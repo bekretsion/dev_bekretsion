@@ -42,6 +42,10 @@
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
+/* Nothing may ever widen the page sideways on a phone. hidden on html propagates to the
+   viewport; clip on body doesn't turn body into its own scroll container. */
+html{overflow-x:hidden;}
+body{overflow-x:clip;}
 body{
   background:var(--paper);
   color:var(--ink);
@@ -53,7 +57,9 @@ body{
 a{color:inherit;}
 button{font-family:inherit;color:inherit;}
 h1,h2,.tagline{text-wrap:balance;margin:0;}
-h1.eyebrow{font-weight:500;}
+/* the name line wraps on phones: pin the dash to the first line instead of the middle */
+h1.eyebrow{font-weight:500;align-items:flex-start;}
+h1.eyebrow::before{margin-top:.8em;}
 .eyebrow{
   font-family:var(--font-mono);
   font-size:.72rem;
@@ -62,7 +68,7 @@ h1.eyebrow{font-weight:500;}
   color:var(--signal);
   display:flex;align-items:center;gap:.5em;
 }
-.eyebrow::before{content:"";width:1.4em;height:1px;background:var(--signal);}
+.eyebrow::before{content:"";flex:none;width:1.4em;height:1px;background:var(--signal);}
 :focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
 
 .wrap{max-width:1080px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem);}
@@ -88,8 +94,9 @@ h1.eyebrow{font-weight:500;}
   letter-spacing:.08em;
   text-transform:uppercase;
   font-size:.82rem;
+  white-space:nowrap;
 }
-.wordmark span{color:var(--signal);}
+.wordmark-dot{color:var(--signal);}
 .topbar .tag{
   font-family:var(--font-mono);font-size:.7rem;color:var(--ink-muted);
   border:1px solid var(--line-strong);padding:.3em .7em;border-radius:3px;
@@ -116,9 +123,16 @@ h1.eyebrow{font-weight:500;}
 @media (prefers-reduced-motion: reduce){.social-link span{transition:none;}}
 
 @media (max-width:640px){
+  .topbar{gap:.75rem;}
   .topbar-right{gap:.9rem;}
   .topbar .tag{display:none;}
+  .brand{gap:.65rem;}
+  .avatar{width:2.6rem;height:2.6rem;}
+  .wordmark{font-size:.74rem;letter-spacing:.06em;}
+  .social-links{gap:.85rem;}
 }
+/* below 390px the full name no longer fits beside the icons; the h1 right under it still carries it */
+@media (max-width:389px){.wordmark-last{display:none;}}
 
 /* ---------- hero ---------- */
 .hero-zone{display:flex;align-items:stretch;gap:clamp(1.25rem,2.5vw,2rem);padding:1.5rem clamp(1.25rem,4vw,2.5rem) 4rem;}
@@ -138,6 +152,7 @@ h1.eyebrow{font-weight:500;}
   max-width:none;
 }
 .hero p{color:var(--ink-muted);font-size:.98rem;max-width:50ch;}
+@media (max-width:640px){.hero .tagline{font-size:clamp(1.3rem,5.4vw,1.6rem);}}
 /* keeps hyphenated terms from breaking across lines at the hyphen */
 .nowrap{white-space:nowrap;}
 
@@ -234,6 +249,7 @@ h1.eyebrow{font-weight:500;}
   .shape-field{min-height:0;border-radius:14px;}
   .wall-text{padding-bottom:1.25rem;}
   .wall-surface,.wall-grain{inset:0;}
+  .wall-surface::after{display:none;}
   .floor,.shape,.shape-shadow,.shape-hint{display:none;}
   .shape-chips{display:flex;}
   .hide-mobile{display:none;}
@@ -466,6 +482,12 @@ section.grid-section{padding:1rem 0 5rem;}
 .pp-actions{display:flex;align-items:center;gap:.9rem;flex:none;margin-top:.05rem;}
 .pp-link{font-family:var(--font-mono);font-size:.78rem;text-decoration:none;color:var(--signal);border-bottom:1px solid transparent;white-space:nowrap;}
 .pp-link:hover{border-color:var(--signal);}
+/* phones: the title and description shared a row with the live-site link and wrapped into a thin strip */
+@media (max-width:640px){
+  .pp-header{flex-direction:column;align-items:stretch;grid-template-columns:1fr;gap:1rem;}
+  .pp-header > div:first-child{min-width:0;width:100%;}
+  .pp-actions{margin-top:0;}
+}
 
 .panel-body{flex:1;display:flex;gap:1rem;padding:1.25rem clamp(1.25rem,4vw,2.5rem) 1.75rem;min-height:0;}
 .pane{position:relative;flex:0 0 auto;width:calc(50% - .45rem);overflow:hidden;border:1px solid var(--line);background:var(--paper-raised-2);transition:width .45s cubic-bezier(.65,0,.35,1),filter .45s ease;}
@@ -608,4 +630,4 @@ section.grid-section{padding:1rem 0 5rem;}
   border:0;background:var(--signal);color:var(--signal-ink);cursor:pointer;
 }
 
-@media (max-width:640px){.legend{flex-direction:column;gap:.6rem;}}
+@media (max-width:640px){.legend{flex-direction:column;align-items:flex-start;gap:.6rem;}}

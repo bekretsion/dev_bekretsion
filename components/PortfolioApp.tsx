@@ -72,7 +72,10 @@ export default function PortfolioApp() {
             )}
           </span>
           <div className="wordmark">
-            Bekretsion<span> · </span>Seyoum
+            Bekretsion
+            <span className="wordmark-last">
+              <span className="wordmark-dot"> · </span>Seyoum
+            </span>
           </div>
         </div>
         <div className="topbar-right">
@@ -139,10 +142,10 @@ export default function PortfolioApp() {
           <section className="grid-section" id="grid">
             <div className="section-head">
               <span className="eyebrow">Projects</span>
-              <h2>Projects, playing quietly</h2>
+              <h2>Things I&rsquo;ve built</h2>
               <p>
-                Tap a card to open the project: the build on the left, its walkthrough on the right. Hover either
-                half and it takes the room; move away and they settle back to even.
+                A voice AI receptionist, a real-time collaboration backend, and automations for leads, invoices and
+                video. Open a card to see how each one works.
               </p>
             </div>
             <div className="grid">
