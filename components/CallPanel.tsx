@@ -6,14 +6,19 @@ import { Conversation } from '@elevenlabs/client';
 import type { Mode, Status } from '@elevenlabs/client';
 import { useOverlay } from '@/lib/useOverlay';
 import { profile } from '@/lib/portfolio-data';
-import { OPEN_CALL_EVENT } from '@/lib/call';
+import { OPEN_CALL_EVENT, TALK_LIMIT_SECONDS } from '@/lib/call';
 import { EMAIL_PATTERN } from '@/lib/lead';
-
-const AGENT_ID = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+import { EMAIL } from '@/lib/site';
 
 // The greeting bubble: shown once per visit, a few seconds in, until opened or dismissed.
 const BUBBLE_DELAY_MS = 7000;
 const BUBBLE_DISMISSED_KEY = 'bk-call-bubble-dismissed';
+
+// With this much talk time left, the agent is told to get the visitor's details or wrap up.
+const WRAP_UP_SECONDS = 60;
+
+// Tabs of the site tell each other when a call starts, so one browser never has two calls going.
+const CALL_CHANNEL = 'bk-call';
 
 interface TranscriptEntry {
   id: number;
@@ -37,6 +42,22 @@ function setSessionFlag(key: string) {
   }
 }
 
+/** 192 → "3:12" */
+function formatClock(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+/** What to tell the visitor when a call can't start. */
+function startErrorMessage(err: unknown): string {
+  if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+    return 'Allow microphone access to start a voice call, or start a text chat instead.';
+  }
+  if (err instanceof DOMException && err.name === 'NotFoundError') {
+    return 'No microphone was found. You can start a text chat instead.';
+  }
+  return err instanceof Error ? err.message : 'Could not start the assistant. Please try again.';
+}
+
 export default function CallPanel() {
   const overlay = useOverlay();
 
@@ -56,7 +77,19 @@ export default function CallPanel() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const typedEmailRef = useRef<string | null>(null);
 
+  // Talk time this device has left, in seconds. /api/talk keeps the real count; null until asked.
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const deadlineRef = useRef<number | null>(null);
+  const wrapUpSentRef = useRef(false);
+
+  // The call on screen, from the click until it ends; null when there is none. Every start gets a
+  // new number, and anything belonging to an older call (a connection that finishes after End was
+  // pressed, a late disconnect event) sees its number is no longer current and is dropped or shut down.
+  const callRef = useRef<number | null>(null);
+  const callCountRef = useRef(0);
   const conversationRef = useRef<Conversation | null>(null);
+  const mutedRef = useRef(false);
+  const channelRef = useRef<BroadcastChannel | null>(null);
   const nextIdRef = useRef(0);
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
@@ -68,27 +101,18 @@ export default function CallPanel() {
     setBubble(false);
     setSessionFlag(BUBBLE_DISMISSED_KEY);
     overlay.openAt({ x: '50%', y: '50%' });
+    if (callRef.current === null) void refreshRemaining();
   }
-  // Inline "Talk to me" buttons open the panel through a window event; the ref keeps the
-  // listener pointed at the current render's openPanel.
-  const openRef = useRef(openPanel);
-  openRef.current = openPanel;
 
-  useEffect(() => {
-    const onOpen = () => openRef.current();
-    window.addEventListener(OPEN_CALL_EVENT, onOpen);
-    return () => window.removeEventListener(OPEN_CALL_EVENT, onOpen);
-  }, []);
-
-  useEffect(() => {
-    if (sessionFlag(BUBBLE_DISMISSED_KEY)) return;
-    const timer = setTimeout(() => {
-      if (sessionFlag(BUBBLE_DISMISSED_KEY)) return;
-      setBubble(true);
-      setNudge(true);
-    }, BUBBLE_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
+  async function refreshRemaining() {
+    try {
+      const res = await fetch('/api/talk', { cache: 'no-store' });
+      const data = await res.json();
+      if (typeof data.remainingSeconds === 'number') setRemaining(data.remainingSeconds);
+    } catch {
+      // Not knowing is fine: starting a session checks again.
+    }
+  }
 
   function dismissBubble() {
     setBubble(false);
@@ -102,40 +126,114 @@ export default function CallPanel() {
     typedEmailRef.current = null;
   }
 
-  async function endCall() {
-    await conversationRef.current?.endSession();
+  /** Takes the panel back to the start screen and hands back the open session, if there was one. */
+  function resetCall(): Conversation | null {
+    const conversation = conversationRef.current;
+    callRef.current = null;
     conversationRef.current = null;
+    deadlineRef.current = null;
     setMode('idle');
     setStatus('disconnected');
     setTranscript([]);
     resetEmailBox();
+    return conversation;
+  }
+
+  /** Ends the call at once, including one that is still connecting. */
+  function endCall() {
+    void resetCall()?.endSession();
   }
 
   function close() {
-    void endCall();
+    endCall();
     overlay.close();
   }
 
+  // Window events and other tabs reach the panel through refs, so they always call this render's code.
+  const openRef = useRef(openPanel);
+  openRef.current = openPanel;
+  const endCallRef = useRef(endCall);
+  endCallRef.current = endCall;
+
+  useEffect(() => {
+    const onOpen = () => openRef.current();
+    window.addEventListener(OPEN_CALL_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_CALL_EVENT, onOpen);
+  }, []);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel(CALL_CHANNEL);
+    channelRef.current = channel;
+    channel.onmessage = () => {
+      if (callRef.current === null) return;
+      endCallRef.current();
+      setError('You started a call in another tab, so this one ended.');
+    };
+    return () => {
+      channel.close();
+      channelRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (sessionFlag(BUBBLE_DISMISSED_KEY)) return;
+    const timer = setTimeout(() => {
+      if (sessionFlag(BUBBLE_DISMISSED_KEY)) return;
+      setBubble(true);
+      setNudge(true);
+    }, BUBBLE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   async function start(textOnly: boolean) {
+    if (callRef.current !== null) return; // one call at a time
+    const call = ++callCountRef.current;
+    callRef.current = call;
+    const isCurrent = () => callRef.current === call;
+
+    // The call screen, with Mute and End, shows straight away; connecting happens behind it.
     setError(null);
     setTranscript([]);
     resetEmailBox();
-
-    if (!AGENT_ID) {
-      setError('The assistant isn’t configured yet — no agent ID set.');
-      return;
-    }
+    setMuted(false);
+    mutedRef.current = false;
+    setAgentMode('listening');
+    setStatus('connecting');
+    setMode(textOnly ? 'text' : 'voice');
+    channelRef.current?.postMessage('call-started');
 
     try {
       if (!textOnly) {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Ask for the microphone before taking a pass. The SDK opens its own stream, so this one closes.
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        if (!isCurrent()) return;
       }
+
+      // The server hands out a one-time pass only while this device has talk time left.
+      const res = await fetch('/api/talk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: textOnly ? 'text' : 'voice' }),
+      });
+      const pass = await res.json().catch(() => ({}));
+      if (!isCurrent()) return;
+      if (typeof pass.remainingSeconds === 'number') setRemaining(pass.remainingSeconds);
+      if (!res.ok) {
+        resetCall();
+        // 429 means the time is used up, which the start screen explains.
+        if (res.status !== 429) setError(pass.error ?? 'Could not start the assistant. Please try again.');
+        return;
+      }
+      wrapUpSentRef.current = false;
+
       const conversation = await Conversation.startSession({
-        agentId: AGENT_ID,
         // Text chats go over a websocket: WebRTC is built for audio, and a text-only session over
         // it closed right after the first message.
-        connectionType: textOnly ? 'websocket' : 'webrtc',
-        textOnly,
+        ...(textOnly
+          ? { signedUrl: String(pass.signedUrl), connectionType: 'websocket' as const, textOnly: true }
+          : { conversationToken: String(pass.conversationToken), connectionType: 'webrtc' as const }),
         clientTools: {
           // Shows the email field on screen; the agent calls it right after asking for an email.
           show_email_box: async () => {
@@ -154,7 +252,7 @@ export default function CallPanel() {
               const data = await res.json().catch(() => ({}));
               if (res.ok) {
                 setEmailBox('hidden');
-                return 'Saved. Tell them Bekretsion will be in touch soon.';
+                return 'Saved. Tell them Bekre will be in touch soon.';
               }
               return `Not saved: ${data.error ?? 'unknown error'}`;
             } catch {
@@ -162,28 +260,73 @@ export default function CallPanel() {
             }
           },
         },
-        onConnect: () => setStatus('connected'),
+        onConnect: () => {
+          if (!isCurrent()) return;
+          setStatus('connected');
+          deadlineRef.current = Date.now() + pass.remainingSeconds * 1000;
+        },
         onDisconnect: (details) => {
-          setStatus('disconnected');
-          conversationRef.current = null;
-          setMode('idle');
+          if (!isCurrent()) return;
+          resetCall();
           if (details.reason === 'error') {
             setError(('message' in details && details.message) || 'The connection dropped. Please try again.');
           }
         },
-        onError: (message) => setError(message),
-        onMessage: ({ message, role }) => {
-          setTranscript((prev) => [...prev, { id: nextIdRef.current++, role, text: message }]);
+        onError: (message) => {
+          if (isCurrent()) setError(message);
         },
-        onModeChange: ({ mode }) => setAgentMode(mode),
-        onStatusChange: ({ status }) => setStatus(status),
+        onMessage: ({ message, role }) => {
+          if (!isCurrent()) return;
+          // The expressive voice model lets the agent add audio tags like [warmly]; they're for the
+          // voice, so keep them out of the chat.
+          const text = role === 'agent' ? message.replace(/\[[^\]\n]{1,40}\]\s*/g, '').trim() : message;
+          if (!text) return;
+          setTranscript((prev) => [...prev, { id: nextIdRef.current++, role, text }]);
+        },
+        onModeChange: ({ mode }) => {
+          if (isCurrent()) setAgentMode(mode);
+        },
+        onStatusChange: ({ status }) => {
+          if (isCurrent()) setStatus(status);
+        },
       });
+
+      if (!isCurrent()) {
+        // Ended while it was still connecting (End, closing the panel, a call in another tab).
+        void conversation.endSession();
+        return;
+      }
       conversationRef.current = conversation;
-      setMode(textOnly ? 'text' : 'voice');
+      if (mutedRef.current) conversation.setMicMuted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start — check microphone permissions.');
+      if (!isCurrent()) return;
+      resetCall();
+      setError(startErrorMessage(err));
     }
   }
+
+  // Counts down this device's talk time during a session: near the end the agent is told to get the
+  // visitor's details or wrap up, and at zero the session ends.
+  const live = mode !== 'idle' && status === 'connected';
+  useEffect(() => {
+    if (!live) return;
+    function tick() {
+      if (deadlineRef.current === null) return;
+      const left = Math.max(0, Math.ceil((deadlineRef.current - Date.now()) / 1000));
+      setRemaining(left);
+      if (left <= WRAP_UP_SECONDS && !wrapUpSentRef.current) {
+        wrapUpSentRef.current = true;
+        conversationRef.current?.sendContextualUpdate(
+          'Less than a minute is left in this conversation. If you don’t have their name and email yet, ask for them now; otherwise wrap up warmly.'
+        );
+      }
+      if (left === 0) endCall();
+    }
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live]);
 
   function submitTypedEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -208,15 +351,17 @@ export default function CallPanel() {
 
   function sendText() {
     const text = textInput.trim();
-    if (!text) return;
+    if (!text || !conversationRef.current) return;
     sendAsUser(text);
     setTextInput('');
   }
 
   function toggleMute() {
-    const next = !muted;
-    conversationRef.current?.setMicMuted(next);
+    const next = !mutedRef.current;
+    mutedRef.current = next;
     setMuted(next);
+    // While still connecting there's no session yet; start() applies the choice once it connects.
+    conversationRef.current?.setMicMuted(next);
   }
 
   useEffect(() => {
@@ -228,14 +373,22 @@ export default function CallPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overlay.open]);
 
-  useEffect(() => () => void conversationRef.current?.endSession(), []);
+  useEffect(
+    () => () => {
+      callRef.current = null;
+      void conversationRef.current?.endSession();
+    },
+    []
+  );
+
+  const connected = status === 'connected';
 
   return (
     <>
       {bubble && !overlay.shown && (
         <div className="call-bubble">
           <button type="button" className="call-bubble-body" onClick={openPanel}>
-            <strong>Hi, I’m Bekretsion’s assistant.</strong>
+            <strong>Hi, I’m Bekre’s assistant.</strong>
             <span>Tell me what you’re working on and I’ll set up a talk with him.</span>
           </button>
           <button type="button" className="call-bubble-close" aria-label="Dismiss" onClick={dismissBubble}>
@@ -291,21 +444,35 @@ export default function CallPanel() {
             {mode === 'idle' && (
               <div className="call-start">
                 {error && <p className="call-error">{error}</p>}
-                <div className="call-start-actions">
-                  <button type="button" className="call-start-btn" onClick={() => start(false)}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
-                      <path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
-                    </svg>
-                    Start a voice call
-                  </button>
-                  <button type="button" className="call-start-btn" onClick={() => start(true)}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M4 4h16v12H7l-3 3z" />
-                    </svg>
-                    Start a text chat
-                  </button>
-                </div>
+                {remaining === 0 ? (
+                  <div className="call-limit">
+                    <strong>You’ve used your {TALK_LIMIT_SECONDS / 60} minutes with my assistant on this device.</strong>
+                    <p>
+                      Want to keep talking? Email me at <a href={`mailto:${EMAIL}`}>{EMAIL}</a> and I’ll get back to you.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="call-start-actions">
+                      <button type="button" className="call-start-btn" onClick={() => start(false)}>
+                        <svg viewBox="0 0 24 24">
+                          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
+                          <path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
+                        </svg>
+                        Start a voice call
+                      </button>
+                      <button type="button" className="call-start-btn" onClick={() => start(true)}>
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 4h16v12H7l-3 3z" />
+                        </svg>
+                        Start a text chat
+                      </button>
+                    </div>
+                    {remaining !== null && remaining < TALK_LIMIT_SECONDS && (
+                      <p className="call-time-note">{formatClock(remaining)} of talk time left</p>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
@@ -314,12 +481,17 @@ export default function CallPanel() {
                 <div className="call-status">
                   <span className={`call-status-dot call-status-${status}`} />
                   {status === 'connecting' && 'Connecting…'}
-                  {status === 'connected' &&
+                  {connected &&
                     (mode === 'text'
                       ? agentMode === 'speaking' ? 'Typing…' : 'Online'
                       : agentMode === 'speaking' ? 'Speaking…' : 'Listening…')}
                   {status === 'disconnecting' && 'Ending…'}
                   {status === 'disconnected' && 'Disconnected'}
+                  {connected && remaining !== null && (
+                    <span className={`call-timer${remaining <= WRAP_UP_SECONDS ? ' call-timer-low' : ''}`}>
+                      {formatClock(remaining)} left
+                    </span>
+                  )}
                 </div>
 
                 <div className="call-transcript">
@@ -376,16 +548,18 @@ export default function CallPanel() {
                   {mode === 'text' && (
                     <div className="call-text-row">
                       <input
+                        id="call-text-input"
                         type="text"
                         value={textInput}
                         onChange={(e) => setTextInput(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') sendText();
                         }}
-                        placeholder="Type a message…"
+                        placeholder={connected ? 'Type a message…' : 'Connecting…'}
                         aria-label="Message"
+                        disabled={!connected}
                       />
-                      <button type="button" onClick={sendText}>
+                      <button type="button" onClick={sendText} disabled={!connected}>
                         Send
                       </button>
                     </div>

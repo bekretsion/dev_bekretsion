@@ -20,17 +20,19 @@ if (!API_KEY) fail('ELEVENLABS_API_KEY is empty in .env.local.');
 const AGENT_NAME = 'Bekretsion’s assistant';
 const PROMPT = readFileSync(path.join(ROOT, 'scripts', 'agent', 'prompt.md'), 'utf8');
 const FIRST_MESSAGE =
-  'Hi, I’m Bekretsion’s assistant. He builds backends and full-stack web products, AI voice receptionists, and business automation. Which of those brings you here, or what are you working on?';
+  'Hey, thanks for stopping by! I’m Bekre’s assistant. He builds backends, full-stack web products, AI voice receptionists and business automation. What brings you here today?';
 
 // Choices carried over from agents already proven in production:
 // - timezone must be set, or the agent has no date anchor and guesses the year;
-// - English agents must use an English flash model (ElevenLabs rejects flash_v2_5 for `en`);
 // - gemini-2.5-flash is the model measured to call tools without inventing completed actions;
-// - end_call has to be added explicitly for agents created through the API;
-// - the voice is always sent (Eric is a premade voice, present in every account).
+// - end_call has to be added explicitly for agents created through the API.
+// The voice: eleven_v3_conversational sounds far more human than the flash models, and an English
+// agent accepts it (ElevenLabs switches expressive mode on with it). It has to be a premade voice:
+// free plans can't use Voice Library voices through the API.
 const TIMEZONE = 'Africa/Addis_Ababa';
 const LLM = 'gemini-2.5-flash';
-const TTS = { model_id: 'eleven_flash_v2', voice_id: 'cjVigY5qzO86Huf0OWal', stability: 0.5, similarity_boost: 0.8, speed: 1.05 };
+const VOICE_ID = 'iP95p4xoKVk53GoZ742B'; // Chris - Charming, Down-to-Earth
+const TTS = { model_id: 'eleven_v3_conversational', voice_id: VOICE_ID, stability: 0.5, similarity_boost: 0.8, speed: 1.0 };
 const ALLOWED_HOSTS = ['www.bekretsion.com', 'bekretsion.com', 'dev-bekretsion.vercel.app'];
 if (process.argv.includes('--local')) ALLOWED_HOSTS.push('localhost');
 
@@ -48,7 +50,7 @@ const TOOLS = [
     type: 'client',
     name: 'submit_lead',
     description:
-      'Save the visitor’s details so Bekretsion can get in touch. Call it as soon as their email has been confirmed. Returns whether it was saved.',
+      'Save the visitor’s details so Bekre can get in touch. Call it as soon as their email has been confirmed. Returns whether it was saved.',
     expects_response: true,
     response_timeout_secs: 20,
     parameters: {
@@ -61,11 +63,11 @@ const TOOLS = [
         topic: {
           type: 'string',
           enum: ['backend', 'full_stack', 'ai_receptionist', 'automation', 'hiring', 'other'],
-          description: 'What they want to talk to Bekretsion about.',
+          description: 'What they want to talk to Bekre about.',
         },
         summary: {
           type: 'string',
-          description: 'Three to five sentences for Bekretsion only: what they need, their situation, and anything that helps him prepare. Only what they said.',
+          description: 'Three to five sentences for Bekre only: what they need, their situation, and anything that helps him prepare. Only what they said.',
         },
         timeline: { type: 'string', description: 'When they need it, only if they mentioned it.' },
         budget: { type: 'string', description: 'Their budget, only if they mentioned it.' },
@@ -147,12 +149,14 @@ async function main() {
         },
       },
       tts: TTS,
-      conversation: { max_duration_seconds: 600 },
+      // No single conversation runs past 4 minutes (TALK_LIMIT_SECONDS in lib/call.ts); /api/talk
+      // also refuses new ones once a device has used that much in total.
+      conversation: { max_duration_seconds: 240 },
     },
     platform_settings: {
-      // The site starts sessions with the public agent id, so auth stays off; the allowlist
-      // keeps the agent to these sites.
-      auth: { enable_auth: false, allowlist: ALLOWED_HOSTS.map((hostname) => ({ hostname })) },
+      // Every session needs a one-time pass from /api/talk, which enforces the per-device limit, so
+      // the agent id alone can't start one. The allowlist keeps passes to these sites.
+      auth: { enable_auth: true, allowlist: ALLOWED_HOSTS.map((hostname) => ({ hostname })) },
       // "Start a text chat" asks for a text-only session; the agent must allow that override.
       overrides: { conversation_config_override: { conversation: { text_only: true } } },
     },
@@ -185,6 +189,9 @@ async function main() {
     tools: toolIds.every((id) => (prompt.tool_ids ?? []).includes(id)),
     firstMessage: saved.conversation_config?.agent?.first_message === FIRST_MESSAGE,
     voice: saved.conversation_config?.tts?.voice_id === TTS.voice_id,
+    voiceModel: saved.conversation_config?.tts?.model_id === TTS.model_id,
+    maxDuration: saved.conversation_config?.conversation?.max_duration_seconds === 240,
+    passRequired: saved.platform_settings?.auth?.enable_auth === true,
     allowlist: ALLOWED_HOSTS.every((h) => (saved.platform_settings?.auth?.allowlist ?? []).some((a) => a.hostname === h)),
     textChat: saved.platform_settings?.overrides?.conversation_config_override?.conversation?.text_only === true,
   };
