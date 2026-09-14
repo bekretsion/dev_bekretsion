@@ -62,6 +62,11 @@ export default function StoryModal({ shown, open, origin, closeRef, close, highl
                 {s.stat && <div className="story-stat">{s.stat}</div>}
                 <h4>{s.title}</h4>
                 <p>{s.body}</p>
+                {s.link && (
+                  <a className="story-link" href={s.link.href} target="_blank" rel="noopener">
+                    {s.link.label} ↗
+                  </a>
+                )}
               </article>
             );
           })}

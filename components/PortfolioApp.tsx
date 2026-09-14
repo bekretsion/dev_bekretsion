@@ -114,11 +114,12 @@ export default function PortfolioApp() {
           </div>
           <ShapeField>
             <div className="hero">
-              <span className="eyebrow">Bekretsion Seyoum · backend engineer · Addis Ababa</span>
-              <h1>
+              {/* The name line is the page's h1: it's what people search for. The tagline keeps the big type. */}
+              <h1 className="eyebrow">Bekretsion Seyoum · backend software engineer · Addis Ababa, Ethiopia</h1>
+              <p className="tagline">
                 Real-time backends, <span className="nowrap">multi-tenant</span> APIs, and voice AI that picks up the
                 phone.
-              </h1>
+              </p>
               <p>
                 Five things I built, below — open a card to see the build and its walkthrough side by side.
                 <span className="hide-mobile">

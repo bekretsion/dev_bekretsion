@@ -110,6 +110,8 @@ export interface Story {
   span?: 'lg';
   /** Doesn't straighten or lift on hover — stays pinned at its tilt. */
   pinned?: boolean;
+  /** Optional outbound link under the body, e.g. the institution's site. */
+  link?: { href: string; label: string };
 }
 
 export const stories: Story[] = [
@@ -164,19 +166,22 @@ export const stories: Story[] = [
     rotation: -4,
   },
   {
-    id: 'dst-forecast',
+    id: 'ssgi-dst-forecast',
     category: 'internship',
-    stat: 'v2',
+    stat: 'SSGI',
     title: 'Forecasting geomagnetic storms',
-    body: 'Internship project: a CNN-LSTM that predicts the Dst index from solar-wind data. The second version beat the persistence baseline at every horizon — after finding that the first only looked like it never learned because of an early-stopping bug.',
+    body: 'Internship at Ethiopia’s Space Science and Geospatial Institute: a CNN-LSTM that predicts the Dst index from solar-wind data. The second version beat the persistence baseline at every horizon — after finding that the first only looked like it never learned because of an early-stopping bug.',
     rotation: 4,
+    link: { href: 'https://ssgi.gov.et/', label: 'ssgi.gov.et' },
   },
   {
-    id: 'aau',
+    id: 'heuc',
     category: 'education',
-    title: 'BSc Computer Science, Addis Ababa University',
-    body: 'In progress. Based in Addis Ababa, Ethiopia, and open to remote roles.',
+    stat: 'HEUC',
+    title: 'BSc Computer Science, Hope Enterprise University College',
+    body: 'In progress in Addis Ababa, Ethiopia, alongside the work. Open to remote roles.',
     rotation: -2,
+    link: { href: 'https://www.heuc.edu.et/', label: 'heuc.edu.et' },
   },
 ];
 
