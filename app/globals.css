@@ -535,7 +535,12 @@ section.grid-section{padding:1rem 0 5rem;}
 }
 .call-fab svg{width:18px;height:18px;stroke:var(--paper);fill:none;stroke-width:1.6;}
 .call-fab:hover{filter:brightness(1.15);}
-@media (max-width:640px){.call-fab{padding:.75rem;}.call-fab .call-fab-label{display:none;}}
+/* phones: icon-only, and big enough to find with a thumb (about 60% wider than it was) */
+@media (max-width:640px){
+  .call-fab{display:flex;align-items:center;justify-content:center;padding:0;width:4.25rem;height:4.25rem;}
+  .call-fab svg{width:1.75rem;height:1.75rem;}
+  .call-fab .call-fab-label{display:none;}
+}
 
 /* a simple centered modal, not a full-bleed destination like the other panels */
 .call-backdrop{

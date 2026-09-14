@@ -69,6 +69,9 @@ const structuredData = {
       award: ["National finalist, ALX Ethiopia × Kuriftu Hospitality Hackathon 2026"],
       knowsAbout: [
         "Backend development",
+        "Full-stack development",
+        "Next.js",
+        "React",
         "Node.js",
         "TypeScript",
         "PostgreSQL",

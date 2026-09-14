@@ -135,7 +135,7 @@ export default function CallPanel() {
             <div>
               <span className="pp-tag">Book time with me</span>
               <h2>Talk it through with my assistant.</h2>
-              <p>It can check my calendar and book a slot directly — you’ll get an email, I’ll get a ping.</p>
+              <p>It can check my calendar and book a slot directly — you’ll get a calendar invite with the meeting link.</p>
             </div>
             <button ref={overlay.closeRef} type="button" className="call-modal-close" onClick={close} aria-label="Close">
               ×

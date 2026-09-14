@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { exchangeCodeForTokens } from '@/lib/google';
 
 function page(body: string) {
@@ -7,8 +9,24 @@ function page(body: string) {
   });
 }
 
+/** Writes the token into .env.local, so it never has to be copied off the screen. */
+async function saveRefreshToken(token: string): Promise<boolean> {
+  const envPath = path.join(process.cwd(), '.env.local');
+  try {
+    const current = await fs.readFile(envPath, 'utf8');
+    const line = `GOOGLE_REFRESH_TOKEN=${token}`;
+    const next = /^GOOGLE_REFRESH_TOKEN=.*$/m.test(current)
+      ? current.replace(/^GOOGLE_REFRESH_TOKEN=.*$/m, () => line)
+      : `${current.trimEnd()}\n${line}\n`;
+    await fs.writeFile(envPath, next);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
-  // See start/route.ts — this prints a live refresh token and must never run in production.
+  // See start/route.ts — this handles a live refresh token and must never run in production.
   if (process.env.NODE_ENV === 'production') return new NextResponse(null, { status: 404 });
 
   const code = req.nextUrl.searchParams.get('code');
@@ -29,10 +47,12 @@ export async function GET(req: NextRequest) {
           `Go to https://myaccount.google.com/permissions, remove access for this app, then visit /api/google/oauth/start again.`
       );
     }
+    if (await saveRefreshToken(tokens.refresh_token)) {
+      return page('Calendar access saved to .env.local (GOOGLE_REFRESH_TOKEN). You can close this tab.');
+    }
     return page(
-      `Success. Copy this into your .env.local as GOOGLE_REFRESH_TOKEN, then restart the dev server:\n\n` +
-        `${tokens.refresh_token}\n\n` +
-        `This route exposes a live refresh token — do not deploy it to production without removing or locking it down afterward.`
+      `Couldn't write .env.local. Add this line to it yourself, then restart the dev server:\n\n` +
+        `GOOGLE_REFRESH_TOKEN=${tokens.refresh_token}`
     );
   } catch (err) {
     console.error('Google OAuth callback failed', err);

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "node -e \"require('fs').rmSync('.next/cache',{recursive:true,force:true})\" && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "agent:setup": "node scripts/setup-agent.mjs",
+    "vercel:sync": "node scripts/sync-vercel.mjs"
   },
   "dependencies": {
     "@elevenlabs/client": "^1.18.0",

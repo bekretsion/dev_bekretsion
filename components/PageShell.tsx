@@ -25,6 +25,8 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className="doc-nav" aria-label="Site">
           <Link href="/#grid">Projects</Link>
+          <Link href="/backend-development">Backend</Link>
+          <Link href="/full-stack-development">Full-stack</Link>
           <Link href="/ai-voice-receptionist">AI receptionist</Link>
           <Link href="/business-automation">Automation</Link>
         </nav>

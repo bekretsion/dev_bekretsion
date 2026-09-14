@@ -75,3 +75,26 @@ export async function createCalendarEvent(details: BookingDetails) {
   });
   return res.data;
 }
+
+/**
+ * The event this attendee already has at exactly this start time, if any. Lets book_meeting
+ * return the existing booking when the agent retries a call, instead of creating a duplicate.
+ */
+export async function findBookingForAttendee(startTime: string, endTime: string, email: string) {
+  const calendar = getCalendarClient();
+  const start = Date.parse(startTime);
+  const res = await calendar.events.list({
+    calendarId: calendarId(),
+    timeMin: new Date(start).toISOString(),
+    timeMax: new Date(Date.parse(endTime)).toISOString(),
+    singleEvents: true,
+    maxResults: 25,
+  });
+  const target = email.trim().toLowerCase();
+  return (res.data.items ?? []).find(
+    (ev) =>
+      ev.status !== 'cancelled' &&
+      Date.parse(ev.start?.dateTime ?? '') === start &&
+      (ev.attendees ?? []).some((a) => a.email?.toLowerCase() === target)
+  );
+}
