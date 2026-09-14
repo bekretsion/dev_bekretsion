@@ -22,6 +22,7 @@ export default function PortfolioApp() {
   const [videoUnmuted, setVideoUnmuted] = useState(false);
   const [toggleOn, setToggleOn] = useState(true);
   const [actionDone, setActionDone] = useState(false);
+  const [siteLoaded, setSiteLoaded] = useState(false);
 
   const {
     shown: projectShown,
@@ -43,6 +44,7 @@ export default function PortfolioApp() {
     setActionDone(false);
     setVideoUnmuted(false);
     setFocusPane(null);
+    setSiteLoaded(false);
     openProjectAt(originFromEvent(e));
   }
 
@@ -234,63 +236,90 @@ export default function PortfolioApp() {
             </div>
           </header>
 
-          <div className="panel-body" data-focus={focusPane ?? undefined} onMouseLeave={() => setFocusPane(null)}>
-            <div className="pane pane-live" onMouseEnter={() => setFocusPane('live')}>
-              <div className="browser-chrome">
-                <span className="dot" />
-                <span className="dot" />
-                <span className="dot" />
-                <span className="chrome-url">{current?.url}</span>
-              </div>
-              <div className="live-content">
-                <div className="live-row">
-                  <span className="toggle-label">{current?.toggleLabel}</span>
-                  <button
-                    type="button"
-                    className="toggle"
-                    aria-pressed={toggleOn}
-                    aria-label={current?.toggleLabel}
-                    onClick={() => setToggleOn((v) => !v)}
-                  />
+          {current?.embed && current.liveUrl ? (
+            <div className="panel-body">
+              <div className="pane pane-site">
+                <div className="browser-chrome">
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="chrome-url">{current.url}</span>
                 </div>
-                <button type="button" className="action-btn" data-done={actionDone} onClick={handleAction}>
-                  {actionDone ? current?.doneLabel : current?.actionLabel}
-                </button>
-                <div className="status-rows">
-                  {current?.rows.map(([label, value]) => (
-                    <div className="status-row" key={label}>
-                      <span>{label}</span>
-                      <b>{value}</b>
-                    </div>
-                  ))}
+                <div className="site-frame">
+                  {!siteLoaded && <p className="site-loading">Loading {current.url}…</p>}
+                  {/* Only while the window is open, so the site isn't running behind a closed panel. */}
+                  {projectShown && (
+                    <iframe
+                      key={current.id}
+                      src={current.liveUrl}
+                      title={`${current.title}, live site`}
+                      allow="microphone; clipboard-write"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      onLoad={() => setSiteLoaded(true)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="panel-body" data-focus={focusPane ?? undefined} onMouseLeave={() => setFocusPane(null)}>
+              <div className="pane pane-live" onMouseEnter={() => setFocusPane('live')}>
+                <div className="browser-chrome">
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="chrome-url">{current?.url}</span>
+                </div>
+                <div className="live-content">
+                  <div className="live-row">
+                    <span className="toggle-label">{current?.toggleLabel}</span>
+                    <button
+                      type="button"
+                      className="toggle"
+                      aria-pressed={toggleOn}
+                      aria-label={current?.toggleLabel}
+                      onClick={() => setToggleOn((v) => !v)}
+                    />
+                  </div>
+                  <button type="button" className="action-btn" data-done={actionDone} onClick={handleAction}>
+                    {actionDone ? current?.doneLabel : current?.actionLabel}
+                  </button>
+                  <div className="status-rows">
+                    {current?.rows.map(([label, value]) => (
+                      <div className="status-row" key={label}>
+                        <span>{label}</span>
+                        <b>{value}</b>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-            <button
-              type="button"
-              className="pane pane-video"
-              aria-pressed={videoUnmuted}
-              aria-label="Project video, tap to unmute"
-              onClick={() => setVideoUnmuted((v) => !v)}
-              onMouseEnter={() => setFocusPane('video')}
-            >
-              <div className="preview-motion" />
-              <span className="mute-btn">
-                <svg viewBox="0 0 24 24">
-                  {(videoUnmuted ? UNMUTED_PATHS : MUTED_PATHS).map((d) => (
-                    <path key={d} d={d} />
-                  ))}
-                </svg>
-              </span>
-              <span className="eq" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-                <i />
-              </span>
-            </button>
-          </div>
+              <button
+                type="button"
+                className="pane pane-video"
+                aria-pressed={videoUnmuted}
+                aria-label="Project video, tap to unmute"
+                onClick={() => setVideoUnmuted((v) => !v)}
+                onMouseEnter={() => setFocusPane('video')}
+              >
+                <div className="preview-motion" />
+                <span className="mute-btn">
+                  <svg viewBox="0 0 24 24">
+                    {(videoUnmuted ? UNMUTED_PATHS : MUTED_PATHS).map((d) => (
+                      <path key={d} d={d} />
+                    ))}
+                  </svg>
+                </span>
+                <span className="eq" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

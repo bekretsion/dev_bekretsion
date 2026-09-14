@@ -45,7 +45,7 @@ export const caseStudies: CaseStudy[] = [
       'Idempotent scheduled jobs handle call dispatch, billing renewal and assistant activation.',
     ],
     stack: ['Node.js', 'Express', 'MySQL', 'ElevenLabs', 'Vapi', 'Stripe', 'Google Calendar', 'Microsoft Graph', 'Dropbox Sign', 'OAuth 2.0', 'Next.js'],
-    links: [{ label: 'Live app', href: 'https://hello-frontend-three.vercel.app' }],
+    links: [{ label: 'Live app', href: 'https://hello.bekretsion.com' }],
     published: '2026-09-14',
     updated: '2026-09-14',
   },
@@ -73,8 +73,8 @@ export const caseStudies: CaseStudy[] = [
     ],
     stack: ['Node.js', 'TypeScript', 'Yjs', 'WebSockets', 'PostgreSQL', 'Prisma', 'Redis', 'JWT', 'Docker'],
     links: [
+      { label: 'Live demo', href: 'https://collab.bekretsion.com' },
       { label: 'Source on GitHub', href: 'https://github.com/bekretsion/collab_api' },
-      { label: 'Live server', href: 'https://collab-api-jayn.onrender.com' },
     ],
     published: '2026-09-14',
     updated: '2026-09-14',

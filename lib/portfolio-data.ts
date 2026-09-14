@@ -22,6 +22,8 @@ export interface Project {
   url: string;
   /** Real destination for "Open live site"; the button hides when absent. */
   liveUrl?: string;
+  /** Show the live site itself inside the project window instead of the mock below. */
+  embed?: boolean;
   toggleLabel: string;
   actionLabel: string;
   doneLabel: string;
@@ -36,8 +38,9 @@ export const projects: Project[] = [
     title: 'Hello AI',
     short:
       'AI voice receptionist platform: assistants, phone numbers, calls captured and billed by the minute. National finalist, ALX × Kuriftu 2026.',
-    url: 'hello-frontend-three.vercel.app',
-    liveUrl: 'https://hello-frontend-three.vercel.app',
+    url: 'hello.bekretsion.com',
+    liveUrl: 'https://hello.bekretsion.com',
+    embed: true,
     toggleLabel: 'Auto top-up minutes',
     actionLabel: 'Place test call',
     doneLabel: 'Ringing ✓',
@@ -48,8 +51,9 @@ export const projects: Project[] = [
     tag: 'Real-time',
     title: 'Collab API',
     short: 'Self-hostable WebSocket backend for collaborative editing: Yjs CRDTs, tenant isolation at the database, Redis scale-out.',
-    url: 'collab-api-jayn.onrender.com',
-    liveUrl: 'https://collab-api-jayn.onrender.com',
+    url: 'collab.bekretsion.com',
+    liveUrl: 'https://collab.bekretsion.com',
+    embed: true,
     toggleLabel: 'Redis multi-server sync',
     actionLabel: 'Open a document',
     doneLabel: 'Synced ✓',
@@ -99,14 +103,6 @@ export const storyCategoryLabel: Record<StoryCategory, string> = {
   education: 'Education',
   hackathon: 'Hackathon',
 };
-
-export const storyCategoryHeading: Record<StoryCategory, string> = {
-  work: 'Shipping at Innoscribe.',
-  hackathon: 'A national final.',
-  internship: 'Research at SSGI.',
-  education: 'Studying computer science.',
-};
-
 export interface Story {
   id: string;
   category: StoryCategory;
@@ -117,27 +113,29 @@ export interface Story {
   span?: 'lg';
   /** Doesn't straighten or lift on hover — stays pinned at its tilt. */
   pinned?: boolean;
-  /** Optional outbound link under the body, e.g. the institution's site. */
+  /** Optional link under the body: another site (opens in a new tab) or a page here, like a case study. */
   link?: { href: string; label: string };
 }
 
 export const stories: Story[] = [
   {
-    id: 'innoscribe',
+    id: 'pyronix',
     category: 'work',
-    stat: '6+',
-    title: 'Features shipped at Innoscribe',
-    body: 'Backend engineer on an AI phone-call platform built on ElevenLabs. Shipped the calendar booking core, the Planday and Fiken connectors, voice cloning, assistant scheduling and the product-tour engine.',
+    stat: 'Pyronix AI',
+    title: 'Software Engineer, full-time',
+    body: 'Full-stack engineering with Node.js at a custom AI and software development company that builds for US clients. Remote since March 2025.',
     rotation: -2,
     span: 'lg',
+    link: { href: 'https://www.pyronix.tech/', label: 'pyronix.tech' },
   },
   {
-    id: 'booking-zero',
+    id: 'lead-qualification',
     category: 'work',
-    stat: '0',
-    title: 'Double-bookings',
-    body: 'A buffer guard and a shared conflict check sit in front of every booking path, so two requests for the same slot can never both win.',
+    stat: '6.6 s',
+    title: 'Lead Qualification Automation',
+    body: 'An n8n pipeline that scores inbound leads with an LLM and routes them to HubSpot, Slack, Google Sheets and Gmail. In live testing the sales rep was notified in 6.6 seconds, and 25 identical submissions became one contact.',
     rotation: 2,
+    link: { href: '/projects/lead-qualification', label: 'Read the case study' },
   },
   {
     id: 'hello-finalist',

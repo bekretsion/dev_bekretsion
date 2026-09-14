@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { RefObject, useEffect, useMemo, useRef } from 'react';
-import { storiesFor, storyCategoryHeading, storyCategoryLabel, StoryCategory } from '@/lib/portfolio-data';
+import { storiesFor, storyCategoryLabel, StoryCategory } from '@/lib/portfolio-data';
 
 interface StoryModalProps {
   shown: boolean;
@@ -35,10 +36,7 @@ export default function StoryModal({ shown, open, origin, closeRef, close, categ
             <button ref={closeRef} type="button" className="pp-back" onClick={close}>
               ← Back
             </button>
-            <div>
-              <span className="pp-tag">{label}</span>
-              {category && <h2>{storyCategoryHeading[category]}</h2>}
-            </div>
+            <h2>{label}</h2>
           </div>
         </header>
 
@@ -53,11 +51,16 @@ export default function StoryModal({ shown, open, origin, closeRef, close, categ
               {s.stat && <div className="story-stat">{s.stat}</div>}
               <h4>{s.title}</h4>
               <p>{s.body}</p>
-              {s.link && (
-                <a className="story-link" href={s.link.href} target="_blank" rel="noopener">
-                  {s.link.label} ↗
-                </a>
-              )}
+              {s.link &&
+                (s.link.href.startsWith('/') ? (
+                  <Link className="story-link" href={s.link.href}>
+                    {s.link.label} →
+                  </Link>
+                ) : (
+                  <a className="story-link" href={s.link.href} target="_blank" rel="noopener">
+                    {s.link.label} ↗
+                  </a>
+                ))}
             </article>
           ))}
         </div>

@@ -10,7 +10,7 @@ export function GET() {
   const lines = [
     `# ${NAME}`,
     '',
-    '> Software engineer in Addis Ababa, Ethiopia, also known as Bekre. Builds real-time backends, AI voice receptionists that speak Amharic, Afaan Oromo, Tigrinya and 90+ other languages, and business automation with n8n. Open to remote work.',
+    '> Software engineer at Pyronix AI, based in Addis Ababa, Ethiopia, also known as Bekre. Builds real-time backends, AI voice receptionists that speak Amharic, Afaan Oromo, Tigrinya and 90+ other languages, and business automation with n8n. Open to remote work.',
     '',
     `- Website: ${SITE}`,
     `- Email: ${EMAIL}`,

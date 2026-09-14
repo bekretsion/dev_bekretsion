@@ -55,6 +55,7 @@ const structuredData = {
       familyName: "Seyoum",
       alternateName: ["Bekre", "Bekretsion"],
       jobTitle: "Software Engineer",
+      worksFor: { "@type": "Organization", name: "Pyronix AI", url: "https://www.pyronix.tech/" },
       description:
         "Backend software engineer in Addis Ababa, Ethiopia, building real-time APIs, AI voice receptionists in Amharic and 95+ languages, and business automation.",
       url: SITE,
