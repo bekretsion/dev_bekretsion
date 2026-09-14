@@ -11,6 +11,7 @@ import ShapeField from './ShapeField';
 import CallPanel from './CallPanel';
 import IntroVideo from './IntroVideo';
 import SiteFooter from './SiteFooter';
+import TalkButton from './TalkButton';
 
 const MUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M17 9l4 6M21 9l-4 6'];
 const UNMUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13'];
@@ -136,6 +137,7 @@ export default function PortfolioApp() {
                 </span>
               </p>
               <div className="legend">
+                <TalkButton />
                 <a href="#grid">↓ Projects</a>
               </div>
             </div>
@@ -185,6 +187,14 @@ export default function PortfolioApp() {
                 </article>
               ))}
             </div>
+          </section>
+
+          <section className="talk-band" aria-labelledby="talk-band-title">
+            <div>
+              <h2 id="talk-band-title">Have something in mind?</h2>
+              <p>Tell my assistant what you&rsquo;re working on. It takes about two minutes, and I&rsquo;ll follow up personally.</p>
+            </div>
+            <TalkButton />
           </section>
         </div>
       </main>

@@ -1,56 +1,39 @@
-import { Resend } from 'resend';
+// Sends through Resend's REST API. Every send carries an idempotency key, so a repeated request
+// for the same conversation never delivers the same email twice (Resend keeps keys for 24 hours).
 
-export interface BookingEmailDetails {
-  name: string;
-  email: string;
-  startTime: string;
-  meetLink?: string;
-  reason?: string;
-}
+export class EmailNotConfiguredError extends Error {}
 
-export async function sendBookingEmails(details: BookingEmailDetails): Promise<void> {
+export async function sendEmail(message: {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+  idempotencyKey: string;
+}): Promise<{ duplicate: boolean }> {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn('Resend not configured — skipping email.');
-    return;
-  }
-  const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const notifyEmail = process.env.NOTIFY_EMAIL;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) throw new EmailNotConfiguredError('RESEND_API_KEY or RESEND_FROM_EMAIL is not set.');
 
-  const when = new Date(details.startTime).toLocaleString('en-US', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  });
-
-  await resend.emails.send({
-    from,
-    to: details.email,
-    subject: 'Your meeting is booked',
-    text: [
-      `Hi ${details.name},`,
-      '',
-      `Your meeting is confirmed for ${when}.`,
-      details.meetLink ? `Join link: ${details.meetLink}` : null,
-      '',
-      'See you then!',
-    ]
-      .filter(Boolean)
-      .join('\n'),
-  });
-
-  if (notifyEmail) {
-    await resend.emails.send({
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Idempotency-Key': message.idempotencyKey,
+    },
+    body: JSON.stringify({
       from,
-      to: notifyEmail,
-      subject: `New meeting booked: ${details.name}`,
-      text: [
-        `${details.name} (${details.email}) booked a meeting for ${when}.`,
-        details.reason ? `Reason: ${details.reason}` : null,
-        details.meetLink ? `Meet link: ${details.meetLink}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    });
-  }
+      to: [message.to],
+      subject: message.subject,
+      text: message.text,
+      ...(message.html ? { html: message.html } : {}),
+      ...(message.replyTo ? { reply_to: message.replyTo } : {}),
+    }),
+  });
+
+  // Same key with a different payload: this conversation already sent its email.
+  if (res.status === 409) return { duplicate: true };
+  if (!res.ok) throw new Error(`Resend responded ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  return { duplicate: false };
 }

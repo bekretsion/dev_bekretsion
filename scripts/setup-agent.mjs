@@ -1,10 +1,11 @@
-// Creates — or, when NEXT_PUBLIC_ELEVENLABS_AGENT_ID is already set, updates — the ElevenLabs
-// voice agent behind the site's "Talk to me" button, with its two booking tools.
-// Safe to re-run after editing scripts/agent/prompt.md.
+// Creates, or when NEXT_PUBLIC_ELEVENLABS_AGENT_ID is already set updates, the ElevenLabs agent
+// behind the site's "Talk to me" button, with its two client tools. Safe to re-run after
+// editing scripts/agent/prompt.md.
 //
-//   npm run agent:setup
+//   npm run agent:setup             production domains only
+//   npm run agent:setup -- --local  also allow localhost, for testing on this machine
 //
-// Reads ELEVENLABS_API_KEY and AGENT_TOOL_SECRET from .env.local and writes the agent id back.
+// Reads ELEVENLABS_API_KEY from .env.local and writes the agent id back into it.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -14,14 +15,12 @@ const ENV_FILE = path.join(ROOT, '.env.local');
 process.loadEnvFile(ENV_FILE);
 
 const API_KEY = process.env.ELEVENLABS_API_KEY;
-const TOOL_SECRET = process.env.AGENT_TOOL_SECRET;
 if (!API_KEY) fail('ELEVENLABS_API_KEY is empty in .env.local.');
-if (!TOOL_SECRET) fail('AGENT_TOOL_SECRET is empty in .env.local.');
 
-// The canonical host: the apex 308-redirects, and webhook POSTs don't reliably follow redirects.
-const SITE = 'https://www.bekretsion.com';
 const AGENT_NAME = 'Bekretsion’s assistant';
 const PROMPT = readFileSync(path.join(ROOT, 'scripts', 'agent', 'prompt.md'), 'utf8');
+const FIRST_MESSAGE =
+  'Hi, I’m Bekretsion’s assistant. He builds backends and full-stack web products, AI voice receptionists, and business automation. Which of those brings you here, or what are you working on?';
 
 // Choices carried over from agents already proven in production:
 // - timezone must be set, or the agent has no date anchor and guesses the year;
@@ -33,55 +32,45 @@ const TIMEZONE = 'Africa/Addis_Ababa';
 const LLM = 'gemini-2.5-flash';
 const TTS = { model_id: 'eleven_flash_v2', voice_id: 'cjVigY5qzO86Huf0OWal', stability: 0.5, similarity_boost: 0.8, speed: 1.05 };
 const ALLOWED_HOSTS = ['www.bekretsion.com', 'bekretsion.com', 'dev-bekretsion.vercel.app'];
+if (process.argv.includes('--local')) ALLOWED_HOSTS.push('localhost');
 
+// Client tools run in the visitor's browser (components/CallPanel.tsx); names must match exactly.
 const TOOLS = [
   {
-    type: 'webhook',
-    name: 'check_availability',
+    type: 'client',
+    name: 'show_email_box',
     description:
-      'Get free 30-minute meeting slots with Bekretsion between two date-times. Returns each slot with exact start and end values and a spoken description in Addis Ababa time.',
-    response_timeout_secs: 20,
-    api_schema: {
-      url: `${SITE}/api/agent-tools/check-availability`,
-      method: 'POST',
-      request_headers: { 'x-tool-secret': TOOL_SECRET },
-      request_body_schema: {
-        type: 'object',
-        properties: {
-          timeMin: {
-            type: 'string',
-            description: 'Start of the range to search, ISO 8601 with the +03:00 offset, e.g. 2026-09-15T00:00:00+03:00.',
-          },
-          timeMax: {
-            type: 'string',
-            description: 'End of the range to search, ISO 8601 with the +03:00 offset. At most 14 days after timeMin.',
-          },
-        },
-        required: ['timeMin', 'timeMax'],
-      },
-    },
+      'Show an email field on the visitor’s screen so they can type their email instead of saying it. Call it right after asking for their email.',
+    expects_response: false,
+    parameters: { type: 'object', properties: {}, required: [] },
   },
   {
-    type: 'webhook',
-    name: 'book_meeting',
+    type: 'client',
+    name: 'submit_lead',
     description:
-      'Book a 30-minute meeting with Bekretsion at a slot returned by check_availability. Only call after the caller confirmed the slot, their full name and their email address.',
+      'Save the visitor’s details so Bekretsion can get in touch. Call it as soon as their email has been confirmed. Returns whether it was saved.',
+    expects_response: true,
     response_timeout_secs: 20,
-    api_schema: {
-      url: `${SITE}/api/agent-tools/book-meeting`,
-      method: 'POST',
-      request_headers: { 'x-tool-secret': TOOL_SECRET },
-      request_body_schema: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'The caller’s full name, as they gave it.' },
-          email: { type: 'string', description: 'The caller’s email address, exactly as confirmed with them.' },
-          startTime: { type: 'string', description: 'The chosen slot’s exact start value from check_availability.' },
-          endTime: { type: 'string', description: 'The chosen slot’s exact end value from check_availability.' },
-          reason: { type: 'string', description: 'A few words on what they want to discuss.' },
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'The visitor’s name, as they gave it.' },
+        email: { type: 'string', description: 'The visitor’s email address, exactly as confirmed.' },
+        company: { type: 'string', description: 'Their company or organisation, only if they said it.' },
+        role: { type: 'string', description: 'Their role or job title, only if they said it.' },
+        topic: {
+          type: 'string',
+          enum: ['backend', 'full_stack', 'ai_receptionist', 'automation', 'hiring', 'other'],
+          description: 'What they want to talk to Bekretsion about.',
         },
-        required: ['name', 'email', 'startTime', 'endTime'],
+        summary: {
+          type: 'string',
+          description: 'Three to five sentences for Bekretsion only: what they need, their situation, and anything that helps him prepare. Only what they said.',
+        },
+        timeline: { type: 'string', description: 'When they need it, only if they mentioned it.' },
+        budget: { type: 'string', description: 'Their budget, only if they mentioned it.' },
       },
+      required: ['name', 'email', 'topic', 'summary'],
     },
   },
 ];
@@ -144,7 +133,7 @@ async function main() {
     name: AGENT_NAME,
     conversation_config: {
       agent: {
-        first_message: 'Hi, I’m Bekretsion’s assistant. I can tell you about his work or book a call with him. What would you like to know?',
+        first_message: FIRST_MESSAGE,
         language: 'en',
         prompt: {
           prompt: PROMPT,
@@ -164,7 +153,7 @@ async function main() {
       // The site starts sessions with the public agent id, so auth stays off; the allowlist
       // keeps the agent to these sites.
       auth: { enable_auth: false, allowlist: ALLOWED_HOSTS.map((hostname) => ({ hostname })) },
-      // The "Start a text chat" button asks for a text-only session; the agent must allow that override.
+      // "Start a text chat" asks for a text-only session; the agent must allow that override.
       overrides: { conversation_config_override: { conversation: { text_only: true } } },
     },
   };
@@ -187,13 +176,14 @@ async function main() {
     console.log(`✓ created agent ${agentId} and saved it to .env.local`);
   }
 
-  // A PATCH can be accepted without every field persisting, so read the agent back and check.
+  // An accepted PATCH doesn't guarantee every field persisted, so read the agent back.
   const saved = await api('GET', `/convai/agents/${agentId}`);
   const prompt = saved.conversation_config?.agent?.prompt ?? {};
   const checks = {
     timezone: prompt.timezone === TIMEZONE,
     llm: prompt.llm === LLM,
     tools: toolIds.every((id) => (prompt.tool_ids ?? []).includes(id)),
+    firstMessage: saved.conversation_config?.agent?.first_message === FIRST_MESSAGE,
     voice: saved.conversation_config?.tts?.voice_id === TTS.voice_id,
     allowlist: ALLOWED_HOSTS.every((h) => (saved.platform_settings?.auth?.allowlist ?? []).some((a) => a.hostname === h)),
     textChat: saved.platform_settings?.overrides?.conversation_config_override?.conversation?.text_only === true,

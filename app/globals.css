@@ -181,13 +181,13 @@ h1.eyebrow::before{margin-top:.8em;}
 .intro-caption{display:flex;flex-direction:column;gap:.3rem;}
 .intro-title{font-family:var(--font-display);font-weight:600;font-size:1.02rem;line-height:1.3;}
 @media (prefers-reduced-motion: reduce){.intro-poster img,.intro-play{transition:none;}}
-.hero .legend{display:flex;gap:1.5rem;margin-top:.5rem;flex-wrap:wrap;}
-.legend a,.legend button{
+.hero .legend{display:flex;align-items:center;gap:1rem 1.5rem;margin-top:.5rem;flex-wrap:wrap;}
+.legend a,.legend button:not(.talk-button){
   font-family:var(--font-mono);font-size:.78rem;text-decoration:none;
   color:var(--ink);border-bottom:1px solid var(--line-strong);padding-bottom:2px;
   background:none;border-top:0;border-left:0;border-right:0;cursor:pointer;
 }
-.legend a:hover,.legend button:hover{border-color:var(--signal);color:var(--signal);}
+.legend a:hover,.legend button:not(.talk-button):hover{border-color:var(--signal);color:var(--signal);}
 
 /* ---------- the wall ----------
    The hero copy is painted on a lit wall and the shapes stand on the floor in front of it.
@@ -524,23 +524,113 @@ section.grid-section{padding:1rem 0 5rem;}
 }
 
 /* ---------- call trigger + panel ---------- */
-.call-fab{
-  position:fixed;left:1.5rem;bottom:1.5rem;z-index:40;
-  display:flex;align-items:center;gap:.55rem;
-  background:var(--ink);color:var(--paper);
-  border:0;border-radius:999px;padding:.85rem 1.2rem .85rem .9rem;
-  font-family:var(--font-body);font-weight:600;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;
-  box-shadow:0 10px 25px -8px rgba(0,0,0,.4);
-  cursor:pointer;
+/* ---------- "Talk to me": the site's main call to action ----------
+   Everything here serves one goal: get visitors talking to the assistant. The launcher is the
+   only gold, filled, floating thing on the page. It carries a face, a live dot and what the
+   click costs (two minutes, voice or text), sits bottom-right in the thumb zone, pulses once
+   when the page loads and once when the greeting appears, and never loops. */
+.call-launcher{
+  position:fixed;right:clamp(1rem,3vw,1.75rem);bottom:clamp(1rem,3vw,1.75rem);z-index:40;
+  display:flex;align-items:center;gap:.7rem;
+  padding:.45rem 1.25rem .45rem .45rem;border:0;border-radius:999px;cursor:pointer;
+  background:var(--signal);color:var(--signal-ink);text-align:left;
+  font-family:var(--font-body);
+  box-shadow:0 14px 34px -10px rgba(0,0,0,.6);
+  transition:transform .2s ease,box-shadow .2s ease;
 }
-.call-fab svg{width:18px;height:18px;stroke:var(--paper);fill:none;stroke-width:1.6;}
-.call-fab:hover{filter:brightness(1.15);}
-/* phones: icon-only, and big enough to find with a thumb (about 60% wider than it was) */
+.call-launcher:hover,.call-launcher:focus-visible{transform:translateY(-2px);box-shadow:0 18px 40px -10px rgba(0,0,0,.65);}
+.call-launcher-avatar{position:relative;flex:none;width:3.1rem;height:3.1rem;}
+.call-launcher-face{
+  display:grid;place-items:center;width:100%;height:100%;border-radius:50%;overflow:hidden;
+  background:var(--paper-raised-2);box-shadow:0 0 0 2px var(--signal-ink);font-weight:700;
+}
+.call-launcher-face img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.7);transform-origin:50% 36%;}
+.call-launcher-dot{
+  position:absolute;right:-1px;bottom:1px;width:.85rem;height:.85rem;border-radius:50%;
+  background:#22c55e;box-shadow:0 0 0 2px var(--signal);
+}
+.call-launcher-text{display:flex;flex-direction:column;line-height:1.15;}
+.call-launcher-text strong{font-size:1.05rem;font-weight:700;letter-spacing:.01em;}
+.call-launcher-text span{font-size:.74rem;font-weight:600;opacity:.75;}
+@media (prefers-reduced-motion: no-preference){
+  .call-launcher::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    animation:call-ring 1.6s ease-out 1.5s 2;
+  }
+  .call-launcher.nudge::after{animation:call-ring 1.6s ease-out 0s 2;}
+}
+@keyframes call-ring{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--signal) 70%,transparent);}
+  100%{box-shadow:0 0 0 18px transparent;}
+}
 @media (max-width:640px){
-  .call-fab{display:flex;align-items:center;justify-content:center;padding:0;width:4.25rem;height:4.25rem;}
-  .call-fab svg{width:1.75rem;height:1.75rem;}
-  .call-fab .call-fab-label{display:none;}
+  .call-launcher{padding:.4rem 1.1rem .4rem .4rem;gap:.6rem;}
+  .call-launcher-avatar{width:2.9rem;height:2.9rem;}
 }
+
+/* the greeting: sits just above the launcher, opens the panel, dismissible, once per visit */
+.call-bubble{
+  position:fixed;right:clamp(1rem,3vw,1.75rem);bottom:calc(clamp(1rem,3vw,1.75rem) + 4.5rem);z-index:40;
+  width:min(19.5rem,calc(100vw - 2rem));
+  display:flex;align-items:flex-start;
+  background:var(--paper-raised);color:var(--ink);
+  border:1px solid var(--line-strong);border-radius:16px 16px 4px 16px;
+  box-shadow:0 18px 40px -16px rgba(0,0,0,.55);
+  animation:call-pop .35s ease-out both;
+}
+@keyframes call-pop{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion: reduce){.call-bubble,.call-email{animation:none;}}
+.call-bubble-body{
+  flex:1;display:flex;flex-direction:column;gap:.2rem;padding:.9rem 0 .9rem 1rem;
+  border:0;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit;
+}
+.call-bubble-body strong{font-size:.92rem;}
+.call-bubble-body span{font-size:.85rem;line-height:1.45;color:var(--ink-muted);}
+.call-bubble-close{
+  flex:none;width:2.75rem;height:2.75rem;border:0;border-radius:50%;background:none;
+  color:var(--ink-muted);font-size:1.2rem;cursor:pointer;
+}
+.call-bubble-close:hover{color:var(--ink);}
+
+/* inline "Talk to me" buttons (hero, after the projects, every service and case study) */
+.talk-button{
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.8rem 1.35rem;border:0;border-radius:999px;cursor:pointer;
+  background:var(--signal);color:var(--signal-ink);
+  font-family:var(--font-body);font-weight:700;font-size:.98rem;
+  box-shadow:0 10px 24px -12px rgba(0,0,0,.55);
+  transition:transform .2s ease,filter .2s ease;
+}
+.talk-button:hover,.talk-button:focus-visible{transform:translateY(-1px);filter:brightness(1.06);}
+.talk-button svg{width:1.1rem;height:1.1rem;stroke:currentColor;fill:none;stroke-width:1.8;}
+.talk-band{
+  display:flex;align-items:center;justify-content:space-between;gap:1.25rem 2rem;flex-wrap:wrap;
+  margin:0 0 5rem;padding:1.75rem clamp(1.25rem,3vw,2rem);
+  border:1px solid var(--line-strong);border-radius:18px;background:var(--paper-raised);
+}
+.talk-band h2{font-family:var(--font-display);font-weight:600;font-size:clamp(1.3rem,2.4vw,1.7rem);margin:0 0 .35rem;}
+.talk-band p{margin:0;color:var(--ink-muted);max-width:46ch;}
+
+/* the "type your email instead" box the agent opens when it asks for an email */
+.call-email{
+  display:flex;flex-direction:column;gap:.45rem;flex:none;
+  padding:.7rem .8rem;border:1px solid var(--signal);border-radius:12px;background:var(--paper-raised-2);
+  animation:call-pop .25s ease-out both;
+}
+.call-email label{font-size:.8rem;color:var(--ink-muted);}
+.call-email-row{display:flex;align-items:center;gap:.5rem;}
+.call-email-row input{
+  flex:1;min-width:0;padding:.55rem .7rem;font:inherit;font-size:16px;
+  border:1px solid var(--line-strong);border-radius:8px;background:var(--paper);color:var(--ink);
+}
+.call-email-row input:focus-visible{outline:2px solid var(--signal);outline-offset:1px;}
+.call-email-row button[type="submit"]{
+  flex:none;padding:.55rem .9rem;border:0;border-radius:8px;cursor:pointer;
+  background:var(--signal);color:var(--signal-ink);font-weight:700;
+}
+.call-email-close{flex:none;width:2.25rem;height:2.25rem;border:0;background:none;color:var(--ink-muted);font-size:1.1rem;cursor:pointer;}
+.call-email-error{margin:0;font-size:.8rem;color:var(--signal);}
+.call-email-done{margin:0;font-size:.9rem;color:var(--ink);}
 
 /* a simple centered modal, not a full-bleed destination like the other panels */
 .call-backdrop{

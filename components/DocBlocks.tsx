@@ -1,3 +1,4 @@
+import TalkButton from './TalkButton';
 import { EMAIL } from '@/lib/site';
 
 /** The row of headline numbers near the top of a service or case-study page. */
@@ -15,15 +16,16 @@ export function Facts({ facts }: { facts: { value: string; label: string }[] }) 
   );
 }
 
+/** End-of-page call to action: talk to the assistant first, email as the fallback. */
 export function ContactCta({ subject }: { subject: string }) {
   return (
     <aside className="doc-cta">
-      <h2>Work with me</h2>
-      <p>Tell me what your business needs and I&rsquo;ll reply with how I&rsquo;d build it.</p>
-      <a className="doc-button" href={`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`}>
-        Email me
-      </a>
-      <p className="doc-cta-address">{EMAIL}</p>
+      <h2>Let&rsquo;s talk about your project</h2>
+      <p>Tell my assistant what you need. It takes about two minutes, and I&rsquo;ll follow up personally.</p>
+      <TalkButton />
+      <p className="doc-cta-address">
+        Prefer email? <a href={`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`}>{EMAIL}</a>
+      </p>
     </aside>
   );
 }

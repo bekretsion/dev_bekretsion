@@ -15,20 +15,9 @@ const TOKEN = process.env.VERCEL_TOKEN;
 const PROJECT = 'dev-bekretsion';
 const REDEPLOY = process.argv.includes('--redeploy');
 
-// What the deployed app reads. GOOGLE_REDIRECT_URI and the setup-only keys stay local.
-const KEYS = [
-  'NEXT_PUBLIC_ELEVENLABS_AGENT_ID',
-  'AGENT_TOOL_SECRET',
-  'GOOGLE_CLIENT_ID',
-  'GOOGLE_CLIENT_SECRET',
-  'GOOGLE_REFRESH_TOKEN',
-  'GOOGLE_CALENDAR_ID',
-  'RESEND_API_KEY',
-  'RESEND_FROM_EMAIL',
-  'NOTIFY_EMAIL',
-  'TELEGRAM_BOT_TOKEN',
-  'TELEGRAM_CHAT_ID',
-];
+// What the deployed app reads. VERCEL_TOKEN itself stays local. ELEVENLABS_API_KEY is needed on
+// the server so /api/lead can confirm a conversation is real before sending anything.
+const KEYS = ['NEXT_PUBLIC_ELEVENLABS_AGENT_ID', 'ELEVENLABS_API_KEY', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL', 'NOTIFY_EMAIL'];
 
 function fail(message) {
   console.error(`✗ ${message}`);

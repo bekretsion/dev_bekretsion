@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { profile } from '@/lib/portfolio-data';
 import SiteFooter from './SiteFooter';
+import CallPanel from './CallPanel';
 
 // Header and footer for the inner pages (services, case studies). Server-rendered: no client JS.
 export default function PageShell({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
       </header>
       {children}
       <SiteFooter />
+      <CallPanel />
     </>
   );
 }
