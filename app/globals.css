@@ -340,8 +340,8 @@ h1.eyebrow::before{margin-top:.8em;}
 .story-board{
   flex:1;overflow-y:auto;min-height:0;
   padding:2rem clamp(1.25rem,4vw,3rem) 3rem;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:1.75rem 1.25rem;align-content:start;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),360px));
+  justify-content:center;gap:1.75rem 1.25rem;align-content:start;
 }
 .story-card{
   position:relative;
@@ -356,17 +356,15 @@ h1.eyebrow::before{margin-top:.8em;}
   width:10px;height:10px;border-radius:50%;background:var(--signal);
   box-shadow:0 2px 4px rgba(0,0,0,.3);
 }
-.story-card:hover,.story-card:focus-visible,.story-card.highlight{
+.story-card:hover,.story-card:focus-visible{
   transform:rotate(0deg);box-shadow:0 20px 38px -18px rgba(0,0,0,.45);z-index:2;
 }
-.story-card.highlight{outline:2px solid var(--signal);outline-offset:3px;}
 /* pinned cards stay at their tilt — refuse to straighten or lift on hover */
-.story-card.pinned:hover,.story-card.pinned:focus-visible,.story-card.pinned.highlight{
+.story-card.pinned:hover,.story-card.pinned:focus-visible{
   transform:rotate(var(--tilt));box-shadow:0 14px 30px -20px rgba(0,0,0,.35);z-index:1;
 }
 .story-card.span-lg{grid-column:span 2;}
 @media (max-width:640px){.story-card.span-lg{grid-column:span 1;}}
-.story-card .tag{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);}
 .story-stat{font-family:var(--font-display);font-size:2.2rem;font-weight:600;margin:.3rem 0;color:var(--signal);}
 .story-card h4{font-size:1.02rem;font-weight:600;margin:.2rem 0 .5rem;font-family:var(--font-display);}
 .story-card p{color:var(--ink-muted);font-size:.88rem;margin:0;}

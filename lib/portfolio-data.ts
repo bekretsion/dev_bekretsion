@@ -90,7 +90,7 @@ export const projects: Project[] = [
   },
 ];
 
-// The four doors on the hero: each shape opens the story board with one category lit up.
+// The four doors on the hero: each shape opens a board with only its own category's cards.
 export type StoryCategory = 'work' | 'internship' | 'education' | 'hackathon';
 
 export const storyCategoryLabel: Record<StoryCategory, string> = {
@@ -98,6 +98,13 @@ export const storyCategoryLabel: Record<StoryCategory, string> = {
   internship: 'Internship',
   education: 'Education',
   hackathon: 'Hackathon',
+};
+
+export const storyCategoryHeading: Record<StoryCategory, string> = {
+  work: 'Shipping at Innoscribe.',
+  hackathon: 'A national final.',
+  internship: 'Research at SSGI.',
+  education: 'Studying computer science.',
 };
 
 export interface Story {
@@ -131,22 +138,6 @@ export const stories: Story[] = [
     title: 'Double-bookings',
     body: 'A buffer guard and a shared conflict check sit in front of every booking path, so two requests for the same slot can never both win.',
     rotation: 2,
-  },
-  {
-    id: 'integrations-pattern',
-    category: 'work',
-    stat: '6',
-    title: 'Platforms, one connector shape',
-    body: 'Planday, Fiken, Stripe, Vipps — different APIs, same connector pattern underneath, so the sixth integration took a fraction of the first.',
-    rotation: -1,
-  },
-  {
-    id: 'voiceclone-minutes',
-    category: 'work',
-    stat: '2 tiers',
-    title: 'Cloned voice, shipped',
-    body: 'Two-tier voice cloning went from idea to a metered, resellable feature — credits tracked per minute, catalog leak-filtered per account.',
-    rotation: -3,
   },
   {
     id: 'hello-finalist',
@@ -265,8 +256,7 @@ export const roundedPolygonPaths: Record<PolygonKind, string> = {
   octagon: roundedPolygonPath(8, 45 * polygonCornerFraction.octagon),
 };
 
-// Deterministic per-shape "scatter" for the story board: same shape always
-// produces the same shuffle + tilt, but each shape's arrangement is its own.
+// Deterministic tilt for the story board: a category's cards always land at the same angles.
 function hashString(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) {
@@ -287,17 +277,10 @@ function mulberry32(seed: number) {
   };
 }
 
-export function arrangeStories(category: StoryCategory): Story[] {
-  const orderRng = mulberry32(hashString(category));
+/** One category's cards, in the order they're written above, each with its board tilt. */
+export function storiesFor(category: StoryCategory): Story[] {
   const tiltRng = mulberry32(hashString(`${category}:tilt`));
-
-  const shuffled = [...stories];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(orderRng() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  const tilted = shuffled.map((s) => ({ ...s, rotation: Math.round((tiltRng() * 10 - 5) * 10) / 10 }));
-  // The opened category leads the board, so what you land on is what you clicked.
-  return [...tilted.filter((s) => s.category === category), ...tilted.filter((s) => s.category !== category)];
+  return stories
+    .filter((s) => s.category === category)
+    .map((s) => ({ ...s, rotation: Math.round((tiltRng() * 10 - 5) * 10) / 10 }));
 }

@@ -112,7 +112,7 @@ export default function ShapeField({ children }: { children: React.ReactNode }) 
   const shadowRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const hintRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
-  const [highlightCategory, setHighlightCategory] = useState<StoryCategory | null>(null);
+  const [storyCategory, setStoryCategory] = useState<StoryCategory | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
   // The field's inner size. Its height follows the painted text, so any reflow moves the
   // floor — the physics world is rebuilt whenever this changes.
@@ -137,7 +137,7 @@ export default function ShapeField({ children }: { children: React.ReactNode }) 
   function openStory(category: StoryCategory, e: React.SyntheticEvent<HTMLElement>) {
     clickedRef.current = true;
     setHintVisible(false);
-    setHighlightCategory(category);
+    setStoryCategory(category);
     overlay.openAt(originFromEvent(e));
   }
 
@@ -502,7 +502,7 @@ export default function ShapeField({ children }: { children: React.ReactNode }) 
         </div>
       </div>
       {/* Outside the field: the field isolates its own stacking context for the scene layers. */}
-      <StoryModal {...overlay} highlightCategory={highlightCategory} />
+      <StoryModal {...overlay} category={storyCategory} />
     </>
   );
 }
