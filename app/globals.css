@@ -486,7 +486,7 @@ section.grid-section{padding:1rem 0 5rem;}
 @media (max-width:640px){
   .pp-header{flex-direction:column;align-items:stretch;grid-template-columns:1fr;gap:1rem;}
   .pp-header > div:first-child{min-width:0;width:100%;}
-  .pp-actions{margin-top:0;}
+  .pp-actions{margin-top:0;flex-wrap:wrap;}
 }
 
 .panel-body{flex:1;display:flex;gap:1rem;padding:1.25rem clamp(1.25rem,4vw,2.5rem) 1.75rem;min-height:0;}
@@ -631,3 +631,56 @@ section.grid-section{padding:1rem 0 5rem;}
 }
 
 @media (max-width:640px){.legend{flex-direction:column;align-items:flex-start;gap:.6rem;}}
+
+/* ---------- inner pages: services and case studies ---------- */
+.doc-top{
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:1.25rem clamp(1.25rem,4vw,2.5rem);
+}
+.doc-brand{text-decoration:none;color:inherit;}
+.doc-nav{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;font-family:var(--font-mono);font-size:.76rem;}
+.doc-nav a{color:var(--ink-muted);text-decoration:none;}
+.doc-nav a:hover,.doc-nav a:focus-visible{color:var(--signal);}
+@media (max-width:640px){
+  .doc-top{flex-wrap:wrap;row-gap:.9rem;}
+  .doc-nav{width:100%;}
+}
+.doc{max-width:46rem;margin:0 auto;padding:1.5rem clamp(1.25rem,4vw,2.5rem) 4rem;}
+.doc-crumbs{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-muted);margin-bottom:1.5rem;overflow-wrap:anywhere;}
+.doc-crumbs a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong);}
+.doc h1{font-family:var(--font-display);font-weight:600;font-size:clamp(1.75rem,4.6vw,2.6rem);line-height:1.12;margin:.7rem 0 1.1rem;}
+.doc .lede{font-size:1.08rem;line-height:1.65;color:var(--ink);margin:0 0 .9rem;}
+.doc-meta{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.04em;color:var(--ink-muted);margin:0;}
+.doc h2{font-family:var(--font-display);font-weight:600;font-size:1.35rem;margin:2.6rem 0 .8rem;}
+.doc h3{font-size:1rem;font-weight:600;margin:1.3rem 0 .35rem;color:var(--ink);}
+.doc p{color:var(--ink-muted);margin:0 0 .9rem;}
+.doc ul{list-style:disc;padding-left:1.2rem;margin:0;display:grid;gap:.6rem;color:var(--ink-muted);}
+.doc li::marker{color:var(--signal);}
+.doc a{color:var(--signal);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--signal) 45%,transparent);text-underline-offset:3px;}
+.doc a:hover{text-decoration-color:var(--signal);}
+.doc-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.75rem;margin:1.75rem 0 0;}
+.doc-fact{border:1px solid var(--line);background:var(--paper-raised);border-radius:12px;padding:.9rem 1rem;}
+.doc-fact dt{font-family:var(--font-display);font-weight:600;font-size:1.55rem;line-height:1.1;color:var(--signal);}
+.doc-fact dd{margin:.3rem 0 0;font-size:.8rem;line-height:1.4;color:var(--ink-muted);}
+.doc .doc-stack{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:.45rem;}
+.doc .doc-stack li{font-family:var(--font-mono);font-size:.72rem;color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;padding:.25rem .65rem;}
+.doc-cta{margin-top:3rem;padding:1.5rem;border:1px solid var(--line-strong);border-radius:14px;background:var(--paper-raised);}
+.doc .doc-cta h2{margin-top:0;}
+.doc .doc-button{display:inline-block;margin-top:.25rem;background:var(--signal);color:var(--signal-ink);padding:.6rem 1.15rem;border-radius:999px;text-decoration:none;font-weight:600;}
+.doc .doc-button:hover{filter:brightness(1.06);}
+.doc-cta-address{font-family:var(--font-mono);font-size:.74rem;margin:.75rem 0 0;overflow-wrap:anywhere;}
+
+/* ---------- footer (every page) ---------- */
+/* the bottom padding keeps the last links clear of the floating "Talk to me" button */
+.site-footer{
+  max-width:1080px;margin:0 auto;
+  padding:2.5rem clamp(1.25rem,4vw,2.5rem) 6.5rem;
+  border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1.5rem;
+  font-size:.9rem;
+}
+.site-footer h2{font-family:var(--font-mono);font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 .6rem;}
+.site-footer ul{list-style:none;padding:0;margin:0;display:grid;gap:.4rem;}
+.site-footer a{color:var(--ink);text-decoration:none;overflow-wrap:anywhere;}
+.site-footer a:hover,.site-footer a:focus-visible{color:var(--signal);}
+.site-footer-note{grid-column:1/-1;margin:.5rem 0 0;font-family:var(--font-mono);font-size:.7rem;color:var(--ink-muted);}

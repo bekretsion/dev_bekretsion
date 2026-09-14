@@ -1,26 +1,19 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/JsonLd";
+import { NAME, PERSON_ID, PROFILES, SITE, SITE_DESCRIPTION, SITE_TITLE, WEBSITE_ID } from "@/lib/site";
 import "./globals.css";
-
-// Canonical host. Vercel makes www the canonical address and 308-redirects the apex to it,
-// so every absolute URL search engines see must use www too.
-const SITE = "https://www.bekretsion.com";
-
-const NAME = "Bekretsion Seyoum";
-const TITLE = "Bekretsion Seyoum (Bekre) — Software Engineer & Automation, Ethiopia";
-const DESCRIPTION =
-  "Bekretsion Seyoum (Bekre): software engineer in Addis Ababa, Ethiopia. Real-time backends, voice AI receptionists and business automation. Open to remote work.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: TITLE,
-  description: DESCRIPTION,
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   alternates: { canonical: "/" },
   authors: [{ name: NAME, url: SITE }],
   creator: NAME,
   openGraph: {
     type: "profile",
-    title: TITLE,
-    description: DESCRIPTION,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     url: SITE,
     siteName: NAME,
     locale: "en_US",
@@ -29,8 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -39,31 +32,24 @@ export const metadata: Metadata = {
   },
 };
 
-// Tells search engines who this page is about, that "Bekre" and "Bekretsion" are the same
-// person, and which profiles elsewhere belong to him. Google reads ProfilePage → Person.
+// On every page: the site and the person it's about. Other pages point at these by @id —
+// the homepage's ProfilePage, and the author/provider of each service and case study.
+// alternateName tells search engines "Bekre" and "Bekretsion" are the same person; sameAs
+// links the profiles elsewhere that belong to him.
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": `${SITE}/#website`,
+      "@id": WEBSITE_ID,
       url: SITE,
       name: NAME,
       inLanguage: "en",
-      publisher: { "@id": `${SITE}/#person` },
-    },
-    {
-      "@type": "ProfilePage",
-      "@id": `${SITE}/#page`,
-      url: SITE,
-      name: TITLE,
-      description: DESCRIPTION,
-      isPartOf: { "@id": `${SITE}/#website` },
-      mainEntity: { "@id": `${SITE}/#person` },
+      publisher: { "@id": PERSON_ID },
     },
     {
       "@type": "Person",
-      "@id": `${SITE}/#person`,
+      "@id": PERSON_ID,
       name: NAME,
       givenName: "Bekretsion",
       familyName: "Seyoum",
@@ -80,6 +66,7 @@ const structuredData = {
         name: "Hope Enterprise University College",
         url: "https://www.heuc.edu.et/",
       },
+      award: ["National finalist, ALX Ethiopia × Kuriftu Hospitality Hackathon 2026"],
       knowsAbout: [
         "Backend development",
         "Node.js",
@@ -89,15 +76,12 @@ const structuredData = {
         "WebSockets",
         "Voice AI",
         "ElevenLabs",
+        "Vapi",
         "Business automation",
         "n8n",
         "Amharic voice assistants",
       ],
-      sameAs: [
-        "https://www.linkedin.com/in/bekretsion-seyoum",
-        "https://github.com/bekretsion",
-        "https://www.youtube.com/@bekretsion",
-      ],
+      sameAs: [PROFILES.linkedin, PROFILES.github, PROFILES.youtube],
     },
   ],
 };
@@ -110,7 +94,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <JsonLd data={structuredData} />
         {children}
       </body>
     </html>

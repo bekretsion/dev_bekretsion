@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { projects, profile } from '@/lib/portfolio-data';
+import { caseStudyForProject } from '@/lib/case-studies';
 import { originFromEvent } from '@/lib/dom';
 import { useOverlay } from '@/lib/useOverlay';
 import ShapeField from './ShapeField';
 import CallPanel from './CallPanel';
 import IntroVideo from './IntroVideo';
+import SiteFooter from './SiteFooter';
 
 const MUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M17 9l4 6M21 9l-4 6'];
 const UNMUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13'];
@@ -31,6 +34,7 @@ export default function PortfolioApp() {
   const actionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const current = projects.find((p) => p.id === openId);
+  const currentStudy = caseStudyForProject(openId);
 
   function openProject(id: string, e: React.SyntheticEvent<HTMLElement>) {
     setOpenId(id);
@@ -185,6 +189,8 @@ export default function PortfolioApp() {
         </div>
       </main>
 
+      <SiteFooter />
+
       <CallPanel />
 
       <div
@@ -205,6 +211,11 @@ export default function PortfolioApp() {
               </div>
             </div>
             <div className="pp-actions">
+              {currentStudy && (
+                <Link className="pp-link" href={`/projects/${currentStudy.slug}`}>
+                  Read the case study →
+                </Link>
+              )}
               {current?.liveUrl && (
                 <a className="pp-link" href={current.liveUrl} target="_blank" rel="noopener">
                   Open live site ↗
