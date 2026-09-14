@@ -1,119 +1,108 @@
+export const profile = {
+  name: 'Bekretsion Seyoum',
+  initials: 'BS',
+  /** A square photo in /public; set to null to fall back to the initials. */
+  photo: '/me.jpg' as string | null,
+};
+
+/** The hero intro: a YouTube upload, played inside the page. */
+export const intro = {
+  youtubeId: 'KLX1O9-Qvfk',
+  title: 'I Build AI Systems That Automate Real Business Workflows',
+  /** The upload's frame shape — YouTube reports this one as 16:9. */
+  aspect: '16 / 9',
+};
+
 export interface Project {
   id: string;
   tag: string;
   title: string;
   short: string;
+  /** Shown in the mock browser chrome. */
   url: string;
+  /** Real destination for "Open live site"; the button hides when absent. */
+  liveUrl?: string;
   toggleLabel: string;
   actionLabel: string;
   doneLabel: string;
   rows: [string, string][];
 }
 
+// First entry is the featured (double-width) card.
 export const projects: Project[] = [
   {
-    id: 'planday',
-    tag: 'Integration',
-    title: 'Planday connector',
-    short: 'Automation actions synced against Planday’s live scheduling API.',
-    url: 'app.innoscribe.ai/planday',
-    toggleLabel: 'Auto-sync shifts',
-    actionLabel: 'Run sync now',
+    id: 'hello',
+    tag: 'Voice AI',
+    title: 'Hello AI',
+    short:
+      'AI voice receptionist platform: assistants, phone numbers, calls captured and billed by the minute. National finalist, ALX × Kuriftu 2026.',
+    url: 'hello-frontend-three.vercel.app',
+    liveUrl: 'https://hello-frontend-three.vercel.app',
+    toggleLabel: 'Auto top-up minutes',
+    actionLabel: 'Place test call',
+    doneLabel: 'Ringing ✓',
+    rows: [['Voice providers', 'ElevenLabs · Vapi'], ['Languages', '95+'], ['Billing', 'Stripe, per minute']],
+  },
+  {
+    id: 'collab',
+    tag: 'Real-time',
+    title: 'Collab API',
+    short: 'Self-hostable WebSocket backend for collaborative editing: Yjs CRDTs, tenant isolation at the database, Redis scale-out.',
+    url: 'collab-api-jayn.onrender.com',
+    liveUrl: 'https://collab-api-jayn.onrender.com',
+    toggleLabel: 'Redis multi-server sync',
+    actionLabel: 'Open a document',
     doneLabel: 'Synced ✓',
-    rows: [['Last sync', '2 min ago'], ['Shifts updated', '14'], ['Conflicts', '0']],
+    rows: [['Conflicts', 'none — CRDT merge'], ['Tenancy', 'schema per tenant + RLS'], ['Auth', 'JWT, per socket']],
   },
   {
-    id: 'fiken',
-    tag: 'Integration',
-    title: 'Fiken accounting sync',
-    short: 'Panel and sweep that reconcile bookings against Fiken invoices.',
-    url: 'app.innoscribe.ai/fiken',
-    toggleLabel: 'Nightly sweep',
-    actionLabel: 'Reconcile now',
-    doneLabel: 'Reconciled ✓',
-    rows: [['Invoices matched', '128'], ['Open mismatches', '2'], ['Last sweep', '03:00']],
+    id: 'leads',
+    tag: 'Automation',
+    title: 'Lead Qualification',
+    short: 'Inbound-lead pipeline on n8n: LLM scoring, atomic dedupe, and routing to HubSpot, Slack and Gmail within seconds.',
+    url: 'n8n · lead-qualification',
+    toggleLabel: 'LLM scoring',
+    actionLabel: 'Submit test lead',
+    doneLabel: 'Routed HOT ✓',
+    rows: [['Rep notified', '6.6 s'], ['Prospect reply', '8.1 s'], ['25 duplicate submits', '1 contact']],
   },
   {
-    id: 'voiceclone',
-    tag: 'Product',
-    title: 'AI Voice Clone',
-    short: 'Two-tier resellable voice cloning, metered by the credit.',
-    url: 'app.innoscribe.ai/voices',
-    toggleLabel: 'Studio tier',
-    actionLabel: 'Clone voice',
-    doneLabel: 'Queued ✓',
-    rows: [['Voices', '6'], ['Credits left', '420 min'], ['Catalog filter', 'on']],
+    id: 'invoices',
+    tag: 'Document AI',
+    title: 'Document Invoice Processing',
+    short: 'OCR and LLM extraction for invoices — clean, scanned, skewed, handwritten — validated before anything posts.',
+    url: 'n8n · invoice-processing',
+    toggleLabel: 'Auto-post when valid',
+    actionLabel: 'Run 16 fixtures',
+    doneLabel: 'Processed ✓',
+    rows: [['Layouts', 'native · scanned · photo'], ['Money math', 'integer minor units'], ['Fixtures', '16, expected outcomes']],
   },
   {
-    id: 'tour',
-    tag: 'Platform',
-    title: 'Product Tour engine',
-    short: 'Scope-based spotlight tours generated per tab, per wizard.',
-    url: 'app.innoscribe.ai/tours',
-    toggleLabel: 'Show on first visit',
-    actionLabel: 'Preview tour',
-    doneLabel: 'Playing ✓',
-    rows: [['Scopes', '9'], ['Completion rate', '71%'], ['Steps', '5']],
-  },
-  {
-    id: 'booking',
-    tag: 'Platform',
-    title: 'Calendar Booking core',
-    short: 'Buffer-guarded, idempotent booking shared across every call path.',
-    url: 'app.innoscribe.ai/booking',
-    toggleLabel: 'Buffer guard',
-    actionLabel: 'Test booking',
-    doneLabel: 'Booked ✓',
-    rows: [['Slot', 'Thu 14:00'], ['Conflict check', 'passed'], ['Idempotency', 'ok']],
-  },
-  {
-    id: 'stripevipps',
-    tag: 'Payments',
-    title: 'Stripe × Vipps checkout',
-    short: 'Preview-gated Vipps enablement on top of connected Stripe accounts.',
-    url: 'app.innoscribe.ai/checkout',
-    toggleLabel: 'Vipps enabled',
-    actionLabel: 'Test charge',
-    doneLabel: 'Charged ✓',
-    rows: [['Provider', 'Stripe'], ['Method', 'Vipps'], ['Mode', 'sandbox']],
+    id: 'channel',
+    tag: 'Media pipeline',
+    title: 'Channel Builder',
+    short: 'Scripts in, narrated and cut videos out: TTS, Whisper alignment, ffmpeg assembly, and a clip-finder that trims the dead air.',
+    url: 'channel-builder · local',
+    toggleLabel: 'Auto-cut silences',
+    actionLabel: 'Render episode',
+    doneLabel: 'Rendered ✓',
+    rows: [['Narration', 'TTS + Whisper'], ['Assembly', 'ffmpeg'], ['Clips', 'subtractive finder']],
   },
 ];
 
-export type MilestoneCategory = 'placeholder' | 'project' | 'job';
+// The four doors on the hero: each shape opens the story board with one category lit up.
+export type StoryCategory = 'work' | 'internship' | 'education' | 'hackathon';
 
-export interface Milestone {
-  t: number;
-  cat: MilestoneCategory;
-  label: string;
-  title: string;
-  desc: string;
-}
-
-export const milestones: Milestone[] = [
-  { t: 0.05, cat: 'placeholder', label: 'Education', title: '[ Your degree or bootcamp start ]', desc: 'Swap this pin for the real date.' },
-  { t: 0.20, cat: 'placeholder', label: 'Skill', title: '[ First language you shipped in ]', desc: 'Swap this pin for the real one.' },
-  { t: 0.34, cat: 'placeholder', label: 'Job', title: '[ First internship or role ]', desc: 'Swap this pin for the real one.' },
-  { t: 0.47, cat: 'project', label: 'Project', title: 'Shipped Calendar Booking core', desc: 'The shared booking path every call now routes through.' },
-  { t: 0.58, cat: 'placeholder', label: 'Skill', title: '[ Picked up voice-AI tooling ]', desc: 'Swap this pin for the real date.' },
-  { t: 0.71, cat: 'project', label: 'Project', title: 'Shipped Planday connector', desc: 'First live automation connector, deployed end to end.' },
-  { t: 0.84, cat: 'project', label: 'Project', title: 'Shipped AI Voice Clone', desc: 'Resellable two-tier cloning, metered by credit.' },
-  { t: 0.96, cat: 'project', label: 'Project · latest', title: 'Shipped Product Tour engine', desc: 'Scope-based tours, rebuilt end to end.' },
-];
-
-export const markerIconPaths: Record<'project' | 'job' | 'placeholder', string[]> = {
-  project: ['M5 3v18M5 4h13l-3 4 3 4H5'],
-  job: ['M4 8h16v11H4z', 'M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2'],
-  placeholder: ['M12 5v14M5 12h14'],
+export const storyCategoryLabel: Record<StoryCategory, string> = {
+  work: 'Work',
+  internship: 'Internship',
+  education: 'Education',
+  hackathon: 'Hackathon',
 };
-
-export function markerIconFor(m: Milestone): 'project' | 'job' | 'placeholder' {
-  if (m.cat === 'placeholder') return 'placeholder';
-  return m.label.toLowerCase().includes('job') ? 'job' : 'project';
-}
 
 export interface Story {
   id: string;
-  tag: string;
+  category: StoryCategory;
   stat?: string;
   title: string;
   body: string;
@@ -125,16 +114,17 @@ export interface Story {
 
 export const stories: Story[] = [
   {
-    id: 'voiceclone-minutes',
-    tag: 'Achievement',
-    stat: '420 min',
-    title: 'Cloned voice, shipped',
-    body: 'Two-tier voice cloning went from idea to a metered, resellable feature — credits tracked per minute, catalog leak-filtered per account.',
-    rotation: -3,
+    id: 'innoscribe',
+    category: 'work',
+    stat: '6+',
+    title: 'Features shipped at Innoscribe',
+    body: 'Backend engineer on an AI phone-call platform built on ElevenLabs. Shipped the calendar booking core, the Planday and Fiken connectors, voice cloning, assistant scheduling and the product-tour engine.',
+    rotation: -2,
+    span: 'lg',
   },
   {
     id: 'booking-zero',
-    tag: 'Achievement',
+    category: 'work',
     stat: '0',
     title: 'Double-bookings',
     body: 'A buffer guard and a shared conflict check sit in front of every booking path, so two requests for the same slot can never both win.',
@@ -142,44 +132,51 @@ export const stories: Story[] = [
   },
   {
     id: 'integrations-pattern',
-    tag: 'Pattern',
+    category: 'work',
     stat: '6',
     title: 'Platforms, one connector shape',
     body: 'Planday, Fiken, Stripe, Vipps — different APIs, same connector pattern underneath, so the sixth integration took a fraction of the first.',
     rotation: -1,
+  },
+  {
+    id: 'voiceclone-minutes',
+    category: 'work',
+    stat: '2 tiers',
+    title: 'Cloned voice, shipped',
+    body: 'Two-tier voice cloning went from idea to a metered, resellable feature — credits tracked per minute, catalog leak-filtered per account.',
+    rotation: -3,
+  },
+  {
+    id: 'hello-finalist',
+    category: 'hackathon',
+    stat: 'Finalist',
+    title: 'ALX Ethiopia × Kuriftu Hospitality Hackathon, 2026',
+    body: 'Hello, an AI voice receptionist for hotels, made the national final: ElevenLabs or Vapi behind one interface, Stripe minute top-ups, and a post-call engine that fires Slack, Outlook and CRM actions.',
+    rotation: 3,
     span: 'lg',
   },
   {
-    id: 'first-bug',
-    tag: 'Story',
-    title: '[ The first bug that actually taught you something ]',
-    body: 'Placeholder — swap in the real one.',
-    rotation: 4,
-    pinned: true,
-  },
-  {
-    id: 'tour-completion',
-    tag: 'Achievement',
-    stat: '71%',
-    title: 'Tour completion rate',
-    body: 'Spotlight tours scoped per tab and per wizard step, so the walkthrough only ever shows what’s actually relevant to where you are.',
-    rotation: -2,
-  },
-  {
-    id: 'why-build',
-    tag: 'Story',
-    title: '[ Why you build instead of just using the software ]',
-    body: 'Placeholder — swap in the real one.',
-    rotation: 3,
-    pinned: true,
-  },
-  {
-    id: 'fiken-reconciled',
-    tag: 'Achievement',
-    stat: '128',
-    title: 'Invoices reconciled automatically',
-    body: 'A nightly sweep matches bookings against Fiken invoices and only ever surfaces the two or three that actually need a human.',
+    id: 'languages',
+    category: 'hackathon',
+    stat: '95+',
+    title: 'Languages, Amharic included',
+    body: 'Hello answers in 95+ languages through ElevenLabs multilingual models — including Amharic, Afaan Oromo and Tigrinya, which most voice products still skip.',
     rotation: -4,
+  },
+  {
+    id: 'dst-forecast',
+    category: 'internship',
+    stat: 'v2',
+    title: 'Forecasting geomagnetic storms',
+    body: 'Internship project: a CNN-LSTM that predicts the Dst index from solar-wind data. The second version beat the persistence baseline at every horizon — after finding that the first only looked like it never learned because of an early-stopping bug.',
+    rotation: 4,
+  },
+  {
+    id: 'aau',
+    category: 'education',
+    title: 'BSc Computer Science, Addis Ababa University',
+    body: 'In progress. Based in Addis Ababa, Ethiopia, and open to remote roles.',
+    rotation: -2,
   },
 ];
 
@@ -190,14 +187,19 @@ export interface ShapeDef {
   kind: ShapeKind;
   size: number;
   accent?: boolean;
-  storyId: string;
+  category: StoryCategory;
+  /** Short mono tag printed on the shape — the static "this is content" signifier. */
+  label: string;
 }
 
+// Ordered by hiring signal, strongest first: shipped work, a competitive final (team work
+// under a deadline), the internship, then the degree in progress. Gold goes on the top two.
+// Array order is also left-to-right spawn order, so the numbers read in sequence.
 export const shapeDefs: ShapeDef[] = [
-  { id: 's1', kind: 'octagon', size: 196, accent: true, storyId: 'voiceclone-minutes' },
-  { id: 's2', kind: 'circle', size: 172, storyId: 'booking-zero' },
-  { id: 's3', kind: 'square', size: 168, storyId: 'fiken-reconciled' },
-  { id: 's4', kind: 'halfcircle', size: 229, accent: true, storyId: 'integrations-pattern' },
+  { id: 's1', kind: 'octagon', size: 196, accent: true, category: 'work', label: '01 · work' },
+  { id: 's2', kind: 'halfcircle', size: 229, accent: true, category: 'hackathon', label: '02 · hackathon' },
+  { id: 's3', kind: 'circle', size: 172, category: 'internship', label: '03 · internship' },
+  { id: 's4', kind: 'square', size: 168, category: 'education', label: '04 · education' },
 ];
 
 export type PolygonKind = 'octagon';
@@ -280,9 +282,9 @@ function mulberry32(seed: number) {
   };
 }
 
-export function arrangeStories(seedKey: string): Story[] {
-  const orderRng = mulberry32(hashString(seedKey));
-  const tiltRng = mulberry32(hashString(`${seedKey}:tilt`));
+export function arrangeStories(category: StoryCategory): Story[] {
+  const orderRng = mulberry32(hashString(category));
+  const tiltRng = mulberry32(hashString(`${category}:tilt`));
 
   const shuffled = [...stories];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -290,5 +292,7 @@ export function arrangeStories(seedKey: string): Story[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return shuffled.map((s) => ({ ...s, rotation: Math.round((tiltRng() * 10 - 5) * 10) / 10 }));
+  const tilted = shuffled.map((s) => ({ ...s, rotation: Math.round((tiltRng() * 10 - 5) * 10) / 10 }));
+  // The opened category leads the board, so what you land on is what you clicked.
+  return [...tilted.filter((s) => s.category === category), ...tilted.filter((s) => s.category !== category)];
 }

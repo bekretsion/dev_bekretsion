@@ -8,6 +8,9 @@ function page(body: string) {
 }
 
 export async function GET(req: NextRequest) {
+  // See start/route.ts — this prints a live refresh token and must never run in production.
+  if (process.env.NODE_ENV === 'production') return new NextResponse(null, { status: 404 });
+
   const code = req.nextUrl.searchParams.get('code');
   const error = req.nextUrl.searchParams.get('error');
 
