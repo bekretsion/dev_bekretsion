@@ -49,7 +49,6 @@ About Bekre:
 
 His projects:
 - Hello AI: an AI voice receptionist platform. A business gets an assistant and a phone number; calls are answered, saved with transcripts and billed by the minute. ElevenLabs and Vapi run behind one interface, and a post-call engine sends results to Slack, Outlook and CRMs.
-- Collab API: a self-hostable WebSocket backend for real-time collaborative editing, using Yjs CRDTs, a separate PostgreSQL schema per tenant with row-level security, and Redis to scale across servers.
 - Lead Qualification: an n8n pipeline that scores inbound leads with an LLM and routes them to HubSpot, Slack, Google Sheets and Gmail. In live testing the sales rep was notified in 6.6 seconds, the prospect got a reply in 8.1 seconds, and no leads were lost.
 - Document Invoice Processing: reads invoices with OCR, extracts fields with an LLM, and only posts invoices whose numbers check out. It is tested against 16 invoices built to break it.
 

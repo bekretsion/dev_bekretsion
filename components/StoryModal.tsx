@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { storiesFor, storyCategoryLabel, StoryCategory } from '@/lib/portfolio-data';
@@ -41,7 +42,10 @@ export default function StoryModal({ shown, open, origin, closeRef, close, categ
         </header>
 
         <div className="story-board" ref={boardRef}>
-          {cards.map((s) => (
+          {cards.map((s) => {
+            const photos = s.media?.filter((m) => m.type === 'image') ?? [];
+            const clips = s.media?.filter((m) => m.type === 'video') ?? [];
+            return (
             <article
               key={s.id}
               className={`story-card${s.span === 'lg' ? ' span-lg' : ''}${s.pinned ? ' pinned' : ''}`}
@@ -51,6 +55,34 @@ export default function StoryModal({ shown, open, origin, closeRef, close, categ
               {s.stat && <div className="story-stat">{s.stat}</div>}
               <h4>{s.title}</h4>
               <p>{s.body}</p>
+              {photos.length > 0 && (
+                <div className={`story-shots${photos.length > 1 ? ' two' : ''}`}>
+                  {photos.map((m) => (
+                    <Image
+                      key={m.src}
+                      src={m.src}
+                      alt={m.alt}
+                      width={m.width}
+                      height={m.height}
+                      sizes="(max-width: 760px) 90vw, 360px"
+                      // Landscape shots get a wider frame; portraits a taller one. Nothing stretches.
+                      style={{ aspectRatio: m.width >= m.height ? '4 / 3' : '4 / 5' }}
+                    />
+                  ))}
+                </div>
+              )}
+              {clips.map((m) => (
+                <video
+                  key={m.src}
+                  className="story-video"
+                  src={m.src}
+                  poster={m.poster}
+                  aria-label={m.alt}
+                  controls
+                  preload="none"
+                  playsInline
+                />
+              ))}
               {s.link &&
                 (s.link.href.startsWith('/') ? (
                   <Link className="story-link" href={s.link.href}>
@@ -62,7 +94,8 @@ export default function StoryModal({ shown, open, origin, closeRef, close, categ
                   </a>
                 ))}
             </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

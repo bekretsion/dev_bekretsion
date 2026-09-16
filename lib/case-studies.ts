@@ -50,36 +50,6 @@ export const caseStudies: CaseStudy[] = [
     updated: '2026-09-14',
   },
   {
-    slug: 'collab-api',
-    projectId: 'collab',
-    tag: 'Real-time',
-    title: 'Collab API',
-    metaTitle: 'Collab API — Real-Time Collaboration Backend | Bekretsion Seyoum',
-    description:
-      'Collab API: a self-hostable WebSocket backend for real-time collaborative editing, with Yjs CRDTs, per-tenant PostgreSQL isolation and Redis scale-out.',
-    summary:
-      'Collab API is a self-hostable WebSocket backend that adds real-time collaborative editing to any app. Documents sync with Yjs CRDTs, so concurrent edits merge without conflicts in any arrival order, and each tenant is isolated at the database layer rather than only in application code.',
-    facts: [
-      { value: 'CRDT', label: 'merges concurrent edits in any order' },
-      { value: 'RLS', label: 'a PostgreSQL schema per tenant' },
-      { value: 'Redis', label: 'pub/sub to scale across instances' },
-    ],
-    highlights: [
-      'CRDT sync over the Yjs binary protocol removes last-write-wins conflicts, regardless of the order operations arrive in.',
-      'Schema-per-tenant PostgreSQL with row-level security makes cross-tenant leaks impossible at the database layer, not just in middleware.',
-      'A WebSocket auth lifecycle (onAuthenticate → onLoadDocument → onStoreDocument) carries a scoped userId and tenantId through every step.',
-      'A Redis pub/sub adapter scales horizontally across instances without sticky sessions.',
-      'Structured as a monorepo of packages: the server, a client provider, React hooks, a ProseMirror/Tiptap transformer, and extensions for SQLite, Redis, S3 and webhooks.',
-    ],
-    stack: ['Node.js', 'TypeScript', 'Yjs', 'WebSockets', 'PostgreSQL', 'Prisma', 'Redis', 'JWT', 'Docker'],
-    links: [
-      { label: 'Live demo', href: 'https://collab.bekretsion.com' },
-      { label: 'Source on GitHub', href: 'https://github.com/bekretsion/collab_api' },
-    ],
-    published: '2026-09-14',
-    updated: '2026-09-14',
-  },
-  {
     slug: 'lead-qualification',
     projectId: 'leads',
     tag: 'Automation',

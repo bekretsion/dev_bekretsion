@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { projects, profile } from '@/lib/portfolio-data';
@@ -10,19 +10,12 @@ import { useOverlay } from '@/lib/useOverlay';
 import ShapeField from './ShapeField';
 import CallPanel from './CallPanel';
 import IntroVideo from './IntroVideo';
+import ProjectDemo from './ProjectDemo';
 import SiteFooter from './SiteFooter';
 import TalkButton from './TalkButton';
 
-const MUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M17 9l4 6M21 9l-4 6'];
-const UNMUTED_PATHS = ['M5 9v6h4l5 5V4l-5 5H5z', 'M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13'];
-
 export default function PortfolioApp() {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [focusPane, setFocusPane] = useState<'live' | 'video' | null>(null);
-  const [videoUnmuted, setVideoUnmuted] = useState(false);
-  const [toggleOn, setToggleOn] = useState(true);
-  const [actionDone, setActionDone] = useState(false);
-  const [siteLoaded, setSiteLoaded] = useState(false);
 
   const {
     shown: projectShown,
@@ -33,26 +26,12 @@ export default function PortfolioApp() {
     close: closeProject,
   } = useOverlay();
 
-  const actionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const current = projects.find((p) => p.id === openId);
   const currentStudy = caseStudyForProject(openId);
 
   function openProject(id: string, e: React.SyntheticEvent<HTMLElement>) {
     setOpenId(id);
-    setToggleOn(true);
-    setActionDone(false);
-    setVideoUnmuted(false);
-    setFocusPane(null);
-    setSiteLoaded(false);
     openProjectAt(originFromEvent(e));
-  }
-
-  function handleAction() {
-    if (actionDone) return;
-    setActionDone(true);
-    if (actionTimeoutRef.current) clearTimeout(actionTimeoutRef.current);
-    actionTimeoutRef.current = setTimeout(() => setActionDone(false), 1500);
   }
 
   useEffect(() => {
@@ -62,10 +41,6 @@ export default function PortfolioApp() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [projectOpen, closeProject]);
-
-  useEffect(() => () => {
-    if (actionTimeoutRef.current) clearTimeout(actionTimeoutRef.current);
-  }, []);
 
   return (
     <>
@@ -131,7 +106,7 @@ export default function PortfolioApp() {
                 phone.
               </p>
               <p>
-                Five things I built, below — open a card to see the build and its walkthrough side by side.
+                Four things I built, below — open a card to see how each one runs.
                 <span className="hide-mobile">
                   {' '}
                   The shapes standing in front of this wall hold the rest: work, a hackathon final, an internship,
@@ -152,8 +127,8 @@ export default function PortfolioApp() {
               <span className="eyebrow">Projects</span>
               <h2>Things I&rsquo;ve built</h2>
               <p>
-                A voice AI receptionist, a real-time collaboration backend, and automations for leads, invoices and
-                video. Open a card to see how each one works.
+                A voice AI receptionist and automations for leads, invoices and video. Open a card to see how each
+                one works.
               </p>
             </div>
             <div className="grid">
@@ -171,15 +146,9 @@ export default function PortfolioApp() {
                     openProject(p.id, e);
                   }}
                 >
+                  {/* Abstract, and only that: a mute glyph used to sit here implying a video that was never there. */}
                   <div className="preview" aria-hidden="true">
                     <div className="preview-motion" />
-                    <span className="mute-btn">
-                      <svg viewBox="0 0 24 24">
-                        {MUTED_PATHS.map((d) => (
-                          <path key={d} d={d} />
-                        ))}
-                      </svg>
-                    </span>
                   </div>
                   <div className="card-body">
                     <span className="tag">{p.tag}</span>
@@ -236,90 +205,7 @@ export default function PortfolioApp() {
             </div>
           </header>
 
-          {current?.embed && current.liveUrl ? (
-            <div className="panel-body">
-              <div className="pane pane-site">
-                <div className="browser-chrome">
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="chrome-url">{current.url}</span>
-                </div>
-                <div className="site-frame">
-                  {!siteLoaded && <p className="site-loading">Loading {current.url}…</p>}
-                  {/* Only while the window is open, so the site isn't running behind a closed panel. */}
-                  {projectShown && (
-                    <iframe
-                      key={current.id}
-                      src={current.liveUrl}
-                      title={`${current.title}, live site`}
-                      allow="microphone; clipboard-write"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      onLoad={() => setSiteLoaded(true)}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="panel-body" data-focus={focusPane ?? undefined} onMouseLeave={() => setFocusPane(null)}>
-              <div className="pane pane-live" onMouseEnter={() => setFocusPane('live')}>
-                <div className="browser-chrome">
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="chrome-url">{current?.url}</span>
-                </div>
-                <div className="live-content">
-                  <div className="live-row">
-                    <span className="toggle-label">{current?.toggleLabel}</span>
-                    <button
-                      type="button"
-                      className="toggle"
-                      aria-pressed={toggleOn}
-                      aria-label={current?.toggleLabel}
-                      onClick={() => setToggleOn((v) => !v)}
-                    />
-                  </div>
-                  <button type="button" className="action-btn" data-done={actionDone} onClick={handleAction}>
-                    {actionDone ? current?.doneLabel : current?.actionLabel}
-                  </button>
-                  <div className="status-rows">
-                    {current?.rows.map(([label, value]) => (
-                      <div className="status-row" key={label}>
-                        <span>{label}</span>
-                        <b>{value}</b>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="pane pane-video"
-                aria-pressed={videoUnmuted}
-                aria-label="Project video, tap to unmute"
-                onClick={() => setVideoUnmuted((v) => !v)}
-                onMouseEnter={() => setFocusPane('video')}
-              >
-                <div className="preview-motion" />
-                <span className="mute-btn">
-                  <svg viewBox="0 0 24 24">
-                    {(videoUnmuted ? UNMUTED_PATHS : MUTED_PATHS).map((d) => (
-                      <path key={d} d={d} />
-                    ))}
-                  </svg>
-                </span>
-                <span className="eq" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </button>
-            </div>
-          )}
+          <ProjectDemo project={current} active={projectShown} />
         </div>
       </div>
     </>

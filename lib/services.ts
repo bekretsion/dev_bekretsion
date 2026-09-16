@@ -34,7 +34,7 @@ export const services: ServiceDoc[] = [
       'Backend development by Bekretsion Seyoum in Addis Ababa: real-time WebSocket systems, multi-tenant APIs with database-level isolation, auth, payments and integrations. Open to remote work.',
     lede: 'I build backends for products that have to stay correct under real use: real-time WebSocket systems, multi-tenant APIs that isolate each customer at the database layer, and the auth, payment and third-party integrations around them. I’m Bekretsion Seyoum, a backend software engineer in Addis Ababa, Ethiopia, open to remote work.',
     facts: [
-      { value: 'CRDT', label: 'real-time sync in Collab API' },
+      { value: '6.6 s', label: 'from web form to a sales rep alert' },
       { value: 'RLS', label: 'tenant isolation enforced in PostgreSQL' },
       { value: '85+', label: 'ordered migrations run on startup in Hello' },
     ],
@@ -42,10 +42,7 @@ export const services: ServiceDoc[] = [
       {
         heading: 'What I build',
         items: [
-          [
-            { text: 'Real-time systems', href: '/projects/collab-api' },
-            ': WebSocket servers with CRDT sync (Yjs), so concurrent edits merge without conflicts, scaled across instances with Redis.',
-          ],
+          ['Real-time systems: WebSocket servers that keep many clients in sync, scaled across instances with Redis.'],
           ['Multi-tenant APIs: a PostgreSQL schema per tenant with row-level security, scoped JWT auth and role-based access.'],
           [
             { text: 'Payments and billing', href: '/projects/hello-ai' },
@@ -114,10 +111,6 @@ export const services: ServiceDoc[] = [
           [
             { text: 'SaaS dashboards', href: '/projects/hello-ai' },
             ': Hello’s dashboard lets a business manage its AI assistants, calls, appointments, documents and billing, on a Node.js API.',
-          ],
-          [
-            { text: 'Real-time features', href: '/projects/collab-api' },
-            ': collaborative editing in the browser, with React hooks and a Tiptap/ProseMirror editor on a WebSocket backend.',
           ],
           ['Fast, search-friendly websites: server-rendered pages, structured data, and layouts checked on real phone profiles, like this one.'],
         ],

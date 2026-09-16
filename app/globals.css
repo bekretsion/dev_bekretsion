@@ -374,6 +374,18 @@ h1.eyebrow::before{margin-top:.8em;}
   text-decoration:none;border-bottom:1px solid transparent;
 }
 .story-link:hover,.story-link:focus-visible{border-color:var(--signal);}
+/* photos and clips on a story card: each keeps its own shape, nothing is stretched */
+.story-shots{display:grid;gap:.5rem;margin-top:.9rem;}
+/* one photo on a wide card would swallow it; a pair can use the full width */
+.story-shots:not(.two){max-width:520px;}
+.story-shots.two{grid-template-columns:1fr 1fr;}
+.story-shots img{display:block;width:100%;height:auto;object-fit:cover;border:1px solid var(--line);background:var(--paper);}
+/* a phone-shaped clip: capped by height so it can't tower over the card it sits in */
+.story-video{display:block;height:min(380px,48vh);width:auto;max-width:100%;margin:.9rem auto 0;background:#000;border:1px solid var(--line);}
+@media (max-width:640px){
+  .story-shots.two{grid-template-columns:1fr;}
+  .story-video{height:min(300px,42vh);}
+}
 
 /* ---------- section head ---------- */
 .section-head{margin-bottom:1.75rem;display:flex;flex-direction:column;gap:.6rem;max-width:62ch;}
@@ -384,9 +396,9 @@ section.grid-section{padding:1rem 0 5rem;}
 
 /* ---------- project grid ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;}
-/* the lead project takes two columns, so five cards fill two rows with no hole;
-   its preview is widened to match the row height of the single-column cards */
-.card.featured{grid-column:span 2;}
+/* the lead project takes the whole first row, so the remaining three fill the second with no
+   hole, at any column count; its preview is widened to match that row's height */
+.card.featured{grid-column:1 / -1;}
 .card.featured .preview{aspect-ratio:33/10;}
 @media (max-width:640px){.card.featured{grid-column:span 1;}.card.featured .preview{aspect-ratio:16/10;}}
 .card{
@@ -420,31 +432,6 @@ section.grid-section{padding:1rem 0 5rem;}
   50%{background-position:35% 20%, 65% 80%, 0 0;}
   100%{background-position:0% 0%, 100% 100%, 0 0;}
 }
-.mute-btn{
-  position:absolute;top:.6rem;left:.6rem;
-  width:2rem;height:2rem;border-radius:50%;
-  background:rgba(0,0,0,.55);
-  border:1px solid rgba(255,255,255,.25);
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;
-}
-.mute-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8;}
-.eq{
-  position:absolute;bottom:.6rem;left:.6rem;
-  display:flex;align-items:flex-end;gap:2px;height:14px;
-  opacity:0;transition:opacity .2s;
-}
-.pane-video[aria-pressed="true"] .eq{opacity:1;}
-.eq i{width:3px;background:var(--signal);border-radius:1px;display:block;}
-@media (prefers-reduced-motion: no-preference){
-  .pane-video[aria-pressed="true"] .eq i{animation:eq 0.9s ease-in-out infinite;}
-}
-.eq i:nth-child(1){height:40%;animation-delay:0s;}
-.eq i:nth-child(2){height:100%;animation-delay:.15s;}
-.eq i:nth-child(3){height:65%;animation-delay:.3s;}
-.eq i:nth-child(4){height:85%;animation-delay:.45s;}
-@keyframes eq{0%,100%{transform:scaleY(.4);}50%{transform:scaleY(1);}}
-
 .card-body{
   display:flex;flex-direction:column;gap:.5rem;text-align:left;
   padding:1rem 1.1rem 1.2rem;flex:1;
@@ -469,11 +456,14 @@ section.grid-section{padding:1rem 0 5rem;}
 @media (prefers-reduced-motion: reduce){.pp-inner{transition:none;}}
 
 .pp-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1.5rem;padding:1.5rem clamp(1.25rem,4vw,2.5rem);border-bottom:1px solid var(--line);flex:none;}
+/* a real button, not a text link: it's the only way out of a full-screen panel */
 .pp-back{
-  display:inline-flex;align-items:center;gap:.4em;background:none;border:0;padding:0;cursor:pointer;
-  font-family:var(--font-mono);font-size:.78rem;color:var(--ink-muted);margin-bottom:.9rem;
+  display:inline-flex;align-items:center;gap:.5em;cursor:pointer;
+  background:var(--paper-raised-2);border:1px solid var(--line-strong);border-radius:999px;
+  padding:.55rem 1rem;min-height:44px;margin-bottom:1rem;
+  font-family:var(--font-mono);font-size:.8rem;color:var(--ink);
 }
-.pp-back:hover{color:var(--signal);}
+.pp-back:hover,.pp-back:focus-visible{border-color:var(--signal);color:var(--signal);}
 .pp-tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);}
 .pp-header h2{font-family:var(--font-display);font-size:1.5rem;font-weight:600;margin:0 0 .3rem;}
 .pp-header p{color:var(--ink-muted);font-size:.9rem;max-width:56ch;margin:0;}
@@ -485,46 +475,97 @@ section.grid-section{padding:1rem 0 5rem;}
   .pp-header{flex-direction:column;align-items:stretch;grid-template-columns:1fr;gap:1rem;}
   .pp-header > div:first-child{min-width:0;width:100%;}
   .pp-actions{margin-top:0;flex-wrap:wrap;}
+  /* thumb-sized targets: on a phone these two are taps, not hovers */
+  .pp-link{display:inline-flex;align-items:center;min-height:44px;padding:.55rem .95rem;border:1px solid var(--line-strong);border-radius:999px;}
 }
 
-.panel-body{flex:1;display:flex;gap:1rem;padding:1.25rem clamp(1.25rem,4vw,2.5rem) 1.75rem;min-height:0;}
-.pane{position:relative;flex:0 0 auto;width:calc(50% - .45rem);overflow:hidden;border:1px solid var(--line);background:var(--paper-raised-2);transition:width .45s cubic-bezier(.65,0,.35,1),filter .45s ease;}
-.panel-body[data-focus="live"] .pane-live{width:calc(82% - .45rem);}
-.panel-body[data-focus="live"] .pane-video{width:calc(18% - .45rem);filter:blur(5px);}
-.panel-body[data-focus="video"] .pane-video{width:calc(82% - .45rem);}
-.panel-body[data-focus="video"] .pane-live{width:calc(18% - .45rem);filter:blur(5px);}
-@media (prefers-reduced-motion: reduce){.pane{transition:none;}}
+/* One pane, full width. The old 50/50 split existed to sit a "video" next to the demo;
+   there was no video, so there is nothing to split with. */
+.panel-body{flex:1;display:flex;padding:1.25rem clamp(1.25rem,4vw,2.5rem) 1.75rem;min-height:0;}
+.pane{position:relative;width:100%;overflow:hidden;border:1px solid var(--line);background:var(--paper-raised-2);display:flex;flex-direction:column;}
 
-.pane-live{display:flex;flex-direction:column;}
-/* a project's real site, shown in place of the mock: one pane, full width */
-.pane-site{width:100%;flex:1 1 auto;display:flex;flex-direction:column;}
+.pane-site{flex:1 1 auto;}
 .site-frame{position:relative;flex:1;min-height:0;background:var(--paper);}
 .site-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
 .site-loading{position:absolute;inset:0;display:grid;place-items:center;margin:0;font-family:var(--font-mono);font-size:.78rem;color:var(--ink-muted);}
 .browser-chrome{display:flex;align-items:center;gap:.35rem;padding:.55rem .7rem;border-bottom:1px solid var(--line);background:var(--paper-raised);flex:none;}
 .browser-chrome .dot{width:7px;height:7px;border-radius:50%;background:var(--line-strong);}
 .chrome-url{margin-left:.5rem;font-family:var(--font-mono);font-size:.7rem;color:var(--ink-muted);background:var(--paper);border:1px solid var(--line);padding:.2rem .6rem;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.live-content{flex:1;padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;overflow:auto;}
-.live-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;}
-.toggle-label{font-size:.85rem;color:var(--ink-muted);}
-.toggle{width:2.35rem;height:1.35rem;border-radius:999px;background:var(--line-strong);border:0;position:relative;cursor:pointer;flex:none;}
-.toggle::after{content:"";position:absolute;top:2px;left:2px;width:1.05rem;height:1.05rem;border-radius:50%;background:var(--paper-raised);transition:transform .2s;}
-.toggle[aria-pressed="true"]{background:var(--signal);}
-.toggle[aria-pressed="true"]::after{transform:translateX(1rem);background:var(--signal-ink);}
-.action-btn{align-self:flex-start;background:var(--ink);color:var(--paper);border:0;padding:.5rem 1rem;font-size:.8rem;font-family:var(--font-mono);cursor:pointer;}
-.action-btn[data-done="true"]{background:var(--signal);}
-.status-rows{display:flex;flex-direction:column;gap:.4rem;margin-top:.2rem;border-top:1px solid var(--line);padding-top:.7rem;}
+
+/* what stands in for the frame: a still of the real site, plus the way to the real thing */
+.demo-fallback{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--paper);}
+.demo-poster{flex:1;min-height:0;width:100%;object-fit:cover;object-position:top center;}
+.demo-fallback-note{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  padding:.85rem 1rem;border-top:1px solid var(--line);background:var(--paper-raised);flex:none;
+}
+.demo-fallback-note p{margin:0;font-size:.82rem;color:var(--ink-muted);max-width:52ch;}
+.demo-open{
+  display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.1rem;
+  background:var(--signal);color:var(--signal-ink);border:0;
+  font-family:var(--font-mono);font-size:.8rem;text-decoration:none;white-space:nowrap;
+}
+
+/* the replay: a recorded run read back a line at a time, with its own label saying so */
+.pane-replay{flex:1 1 auto;}
+.replay-content{flex:1;padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;overflow:auto;}
+.replay-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.replay-label{
+  font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-muted);border:1px solid var(--line-strong);border-radius:999px;padding:.3rem .7rem;
+}
+.replay-again{
+  display:inline-flex;align-items:center;gap:.4em;min-height:44px;padding:.5rem .95rem;cursor:pointer;
+  background:transparent;border:1px solid var(--line-strong);border-radius:999px;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--ink);
+}
+.replay-again:hover:not(:disabled),.replay-again:focus-visible{border-color:var(--signal);color:var(--signal);}
+.replay-again:disabled{opacity:.4;cursor:default;}
+
+.replay-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55rem;}
+.replay-step{
+  display:grid;grid-template-columns:4.5rem 1fr;gap:.75rem;align-items:baseline;
+  padding-left:.9rem;border-left:1px solid var(--line);
+  opacity:0;transform:translateY(4px);transition:opacity .35s ease,transform .35s ease;
+}
+.replay-step[data-shown="true"]{opacity:1;transform:none;border-left-color:var(--signal);}
+.replay-at{font-family:var(--font-mono);font-size:.72rem;color:var(--signal);text-align:right;}
+.replay-body{display:flex;flex-direction:column;gap:.15rem;min-width:0;}
+.replay-text{font-size:.86rem;color:var(--ink);}
+.replay-detail{font-size:.78rem;color:var(--ink-muted);}
+.replay-outcome{
+  margin:0;padding:.6rem .8rem;border:1px solid var(--line-strong);
+  font-family:var(--font-mono);font-size:.74rem;color:var(--ink);
+  opacity:0;transition:opacity .4s ease;
+}
+.replay-outcome[data-shown="true"]{opacity:1;}
+@media (prefers-reduced-motion: reduce){
+  .replay-step,.replay-outcome{transition:none;}
+}
+
+.status-rows{display:flex;flex-direction:column;gap:.4rem;margin-top:auto;border-top:1px solid var(--line);padding-top:.7rem;}
 .status-row{display:flex;justify-content:space-between;gap:1rem;font-family:var(--font-mono);font-size:.72rem;color:var(--ink-muted);}
 .status-row b{color:var(--ink);font-weight:500;}
 
-.pane-video{border:1px solid var(--line);cursor:pointer;padding:0;background:var(--paper-raised-2);display:block;width:calc(50% - .45rem);}
-
 @media (max-width:760px){
-  .panel-body{flex-direction:column;overflow-y:auto;}
-  .pane,.panel-body[data-focus] .pane{width:100% !important;}
-  .pane-live{min-height:240px;}
-  .pane-site{min-height:420px;}
-  .pane-video{aspect-ratio:16/9;}
+  /* flex-start, or the pane stretches to the body's height and .pane's overflow:hidden
+     clips the end of the demo off the bottom of the screen with no way to scroll to it */
+  .panel-body{overflow-y:auto;align-items:flex-start;}
+  /* A live site is unusable inside a phone-width frame: it swallows scrolling and squeezes a
+     desktop layout into one column. Below this width ProjectDemo never mounts the frame at
+     all — it used to cost the visitor the remote app's whole bundle to render a thumbnail —
+     so what shows here is the still, with the real site one tap away. */
+  .pane-site{flex:none;}
+  .demo-fallback{flex:none;}
+  .demo-poster{flex:none;height:200px;}
+  .demo-fallback-note{flex-direction:column;align-items:stretch;}
+  .demo-open{width:100%;min-height:52px;}
+  /* one scroll container, not two: the pane scrolling inside the scrolling panel body
+     made the replay hard to get out of with a thumb */
+  .pane-replay{flex:none;}
+  .replay-content{overflow:visible;}
+  .status-rows{margin-top:1rem;}
+  .replay-step{grid-template-columns:3.6rem 1fr;gap:.6rem;}
 }
 
 /* ---------- call trigger + panel ---------- */
