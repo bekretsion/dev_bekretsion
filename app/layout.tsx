@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import JsonLd from "@/components/JsonLd";
-import { NAME, PERSON_ID, PROFILES, SITE, SITE_DESCRIPTION, SITE_TITLE, WEBSITE_ID } from "@/lib/site";
+import { NAME, SITE, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,64 +31,8 @@ export const metadata: Metadata = {
   },
 };
 
-// On every page: the site and the person it's about. Other pages point at these by @id —
-// the homepage's ProfilePage, and the author/provider of each service and case study.
-// alternateName tells search engines "Bekre" and "Bekretsion" are the same person; sameAs
-// links the profiles elsewhere that belong to him.
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": WEBSITE_ID,
-      url: SITE,
-      name: NAME,
-      inLanguage: "en",
-      publisher: { "@id": PERSON_ID },
-    },
-    {
-      "@type": "Person",
-      "@id": PERSON_ID,
-      name: NAME,
-      givenName: "Bekretsion",
-      familyName: "Seyoum",
-      alternateName: ["Bekre", "Bekretsion"],
-      jobTitle: "Software Engineer",
-      worksFor: { "@type": "Organization", name: "Pyronix AI", url: "https://www.pyronix.tech/" },
-      description:
-        "Backend software engineer in Addis Ababa, Ethiopia, building real-time APIs, AI voice receptionists in Amharic and 95+ languages, and business automation.",
-      url: SITE,
-      image: `${SITE}/me.jpg`,
-      email: "mailto:bekretsionseyoum4@gmail.com",
-      address: { "@type": "PostalAddress", addressLocality: "Addis Ababa", addressCountry: "ET" },
-      alumniOf: {
-        "@type": "CollegeOrUniversity",
-        name: "Hope Enterprise University College",
-        url: "https://www.heuc.edu.et/",
-      },
-      award: ["National finalist, ALX Ethiopia × Kuriftu Hospitality Hackathon 2026"],
-      knowsAbout: [
-        "Backend development",
-        "Full-stack development",
-        "Next.js",
-        "React",
-        "Node.js",
-        "TypeScript",
-        "PostgreSQL",
-        "Real-time systems",
-        "WebSockets",
-        "Voice AI",
-        "ElevenLabs",
-        "Vapi",
-        "Business automation",
-        "n8n",
-        "Amharic voice assistants",
-      ],
-      sameAs: [PROFILES.linkedin, PROFILES.github, PROFILES.youtube],
-    },
-  ],
-};
-
+// The site-wide structured data (WebSite + Person) lives in components/SiteJsonLd, rendered by
+// the homepage and PageShell rather than here, so /work can stay free of contact details.
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -98,7 +41,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <JsonLd data={structuredData} />
         {children}
       </body>
     </html>

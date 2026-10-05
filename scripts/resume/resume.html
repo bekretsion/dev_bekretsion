@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bekretsion Seyoum - Backend Software Engineer - Resume</title>
+<style>
+  /* Built for applicant tracking systems: one column, real text, standard headings, no tables,
+     no text boxes, nothing in a page header or footer, plain hyphens instead of dashes. */
+  @page { size: A4; margin: 11mm 15mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 9.3pt; line-height: 1.27; color: #111; }
+  h1 { font-size: 19pt; margin: 0; }
+  .role { font-size: 11pt; margin: 1px 0 3px; }
+  .contact { margin: 0 0 4px; }
+  a { color: #111; text-decoration: none; }
+  h2 { font-size: 10.5pt; text-transform: uppercase; letter-spacing: .6px; margin: 9px 0 4px; padding-bottom: 2px; border-bottom: 1px solid #888; }
+  p { margin: 0; }
+  .entry { margin: 0 0 5px; }
+  .title { font-weight: bold; }
+  ul { margin: 2px 0 0 14px; padding: 0; }
+  li { margin: 0 0 1px; }
+  .skills p { margin: 0 0 1px; }
+</style>
+</head>
+<body>
+  <h1>Bekretsion Seyoum</h1>
+  <p class="role">Backend Software Engineer</p>
+  <p class="contact">Addis Ababa, Ethiopia | Open to remote work | <a href="mailto:bekretsionseyoum4@gmail.com">bekretsionseyoum4@gmail.com</a> | <a href="https://www.bekretsion.com">www.bekretsion.com</a> | <a href="https://github.com/bekretsion">github.com/bekretsion</a> | <a href="https://www.linkedin.com/in/bekretsion-seyoum">linkedin.com/in/bekretsion-seyoum</a></p>
+
+  <h2>Summary</h2>
+  <p>Backend software engineer building voice AI platforms, APIs and automation pipelines with Node.js, TypeScript and SQL. Software Engineer at Pyronix AI since 03/2025; national finalist, ALX Ethiopia x Kuriftu Hospitality Hackathon 2026.</p>
+
+  <h2>Experience</h2>
+  <div class="entry">
+    <p class="title">Software Engineer - Pyronix AI</p>
+    <p>Remote | 03/2025 - Present</p>
+    <ul>
+      <li>Full-stack development with Node.js at a custom AI and software development company that builds for US clients.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <p class="title">Intern - Space Science and Geospatial Institute (SSGI)</p>
+    <p>Addis Ababa, Ethiopia | 06/2026 - 09/2026</p>
+    <ul>
+      <li>Built a hybrid CNN-LSTM model in Python that forecasts the Dst geomagnetic storm index from NASA OMNI2 solar-wind data.</li>
+      <li>Rebuilt the pipeline to predict the change in Dst from physics-based features; the second version beat the persistence baseline at every forecast horizon (6 hours ahead: 7.03 nT mean absolute error versus 8.08 nT).</li>
+      <li>Traced the first version's apparent failure to learn to an early-stopping setting, not the model, and corrected the write-ups.</li>
+    </ul>
+  </div>
+
+  <h2>Projects</h2>
+  <div class="entry">
+    <p class="title">Hello AI - AI voice receptionist platform</p>
+    <p>National Finalist, ALX Ethiopia x Kuriftu Hospitality Hackathon 2026 | <a href="https://hello.bekretsion.com">hello.bekretsion.com</a></p>
+    <p>Node.js, Express, MySQL, ElevenLabs, Vapi, Stripe, Dropbox Sign, Google Calendar, OAuth 2.0</p>
+    <ul>
+      <li>Designed a dual-provider voice architecture (ElevenLabs and Vapi) behind one interface; switching providers is one environment variable.</li>
+      <li>Implemented Stripe webhooks with raw-body HMAC signature verification, per-minute billing and automatic minute top-ups.</li>
+      <li>Built a post-call automation engine (extract, map, dispatch) that sends results to Slack, Outlook and CRMs without touching the core call pipeline.</li>
+      <li>85+ sequential database migrations run on startup; supports 95+ languages, including Amharic, Afaan Oromo and Tigrinya.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <p class="title">Lead Qualification Automation</p>
+    <p>n8n, Node.js, PostgreSQL, Google Gemini, HubSpot, Slack | <a href="https://www.bekretsion.com/projects/lead-qualification">bekretsion.com/projects/lead-qualification</a></p>
+    <ul>
+      <li>Inbound-lead pipeline: the webhook acknowledges in about 70 ms, then validates, de-duplicates, classifies each lead with an LLM and scores it in code.</li>
+      <li>In live testing the sales rep was notified in 6.6 s and the prospect received a personalised reply in 8.1 s; 11 of 11 test leads were routed correctly.</li>
+      <li>25 simultaneous identical submissions produced one contact (idempotency key with a UNIQUE constraint); a dead-letter queue with scheduled replay meant 0 leads lost.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <p class="title">Document Invoice Processing</p>
+    <p>n8n, Node.js, Tesseract.js OCR, LLM field extraction | <a href="https://www.bekretsion.com/projects/invoice-processing">bekretsion.com/projects/invoice-processing</a></p>
+    <ul>
+      <li>Extracts invoice fields from native, scanned and photographed invoices with OCR and an LLM, and re-checks every amount in integer minor units.</li>
+      <li>Posts an invoice only when its numbers reconcile; tested against 16 fixtures built to break it, including broken arithmetic, unknown vendors and changed bank details.</li>
+    </ul>
+  </div>
+
+  <h2>Education</h2>
+  <div class="entry">
+    <p class="title">BSc Computer Science - Hope Enterprise University College</p>
+    <p>Addis Ababa, Ethiopia | Expected graduation 07/2027</p>
+  </div>
+
+  <h2>Skills</h2>
+  <div class="skills">
+    <p><b>Languages:</b> TypeScript, JavaScript, Python, SQL</p>
+    <p><b>Backend and web:</b> Node.js, Express, Prisma, REST APIs, WebSockets, webhooks, Next.js, React</p>
+    <p><b>Databases:</b> PostgreSQL, MySQL, Redis</p>
+    <p><b>Auth and security:</b> JWT (RS256), OAuth 2.0, RBAC, HMAC webhook verification, bcrypt</p>
+    <p><b>AI, automation and integrations:</b> n8n, Google Gemini, ElevenLabs, Vapi, Tesseract.js OCR, Stripe, Dropbox Sign, Google Calendar, Microsoft Graph, HubSpot, Slack</p>
+    <p><b>Infrastructure:</b> Docker, GitHub Actions, Vercel, Render, Neon, Upstash</p>
+  </div>
+</body>
+</html>

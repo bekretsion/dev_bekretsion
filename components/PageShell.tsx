@@ -2,12 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { profile } from '@/lib/portfolio-data';
 import SiteFooter from './SiteFooter';
+import SiteJsonLd from './SiteJsonLd';
 import CallPanel from './CallPanel';
 
 // Header and footer for the inner pages (services, case studies). Server-rendered: no client JS.
 export default function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <SiteJsonLd />
       <header className="doc-top">
         <Link href="/" className="brand doc-brand" aria-label="Bekretsion Seyoum, home">
           <span className={`avatar${profile.photo ? '' : ' avatar-empty'}`}>

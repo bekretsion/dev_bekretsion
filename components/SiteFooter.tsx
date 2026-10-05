@@ -34,6 +34,9 @@ export default function SiteFooter() {
             <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
           </li>
           <li>
+            <a href="/resume">Resume (PDF)</a>
+          </li>
+          <li>
             <a href={PROFILES.linkedin} target="_blank" rel="noopener">
               LinkedIn
             </a>
